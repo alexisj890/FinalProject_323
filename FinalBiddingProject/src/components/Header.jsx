@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Header(){
+function Header({onLoginClick}){
     return(
         <header>
             <nav>
@@ -16,7 +16,7 @@ function Header(){
                         <a href="#signup">Sign Up</a>
                     </li>
                     <li>
-                        <a href="#login">Login</a>
+                    <button className="nav-button" onClick={onLoginClick}>Login</button>
                     </li>
                 </ul>
             </nav>

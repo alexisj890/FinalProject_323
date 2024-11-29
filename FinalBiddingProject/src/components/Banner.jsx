@@ -5,7 +5,7 @@ function Banner() {
     <section className="banner">
       <h2>Welcome to Bidding</h2>
       <p>Securely conduct business transactions with ease.</p>
-      <p> To get Started Click on the Get started button bellow</p>
+      <p> To get started click on the get started button bellow.</p>
       <button>Get Started</button>
     </section>
   );
