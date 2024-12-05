@@ -9,6 +9,7 @@ function UserTypes() {
         <p>
           Browse listings and provide comments. Apply to become a User by answering a human verification question.
         </p>
+        <button>Question</button>
       </div>
       <div className="user-type">
         <h3>Users</h3>

@@ -3,7 +3,7 @@ import React from 'react';
 function Features() {
   return (
     <section id="features">
-      <h2>Key Features</h2>
+      <h2>Features on this site</h2>
       <ul>
         <li>Browse and list items/services for sale or rent.</li>
         <li>Secure bidding and transaction processes.</li>
