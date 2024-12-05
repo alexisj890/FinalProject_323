@@ -1,9 +1,9 @@
 // src/components/RegistrationModal.jsx
 import React, { useState } from 'react';
-import { auth, db } from '../firebase'; // Firebase services
+import { auth, db } from '../firebase'; // Import Firebase services
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import './RegistrationModal.css'; // Include your modal styling here
+import './RegistrationModal.css'; // Include your styles
 
 function RegistrationModal({ isOpen, onClose }) {
   if (!isOpen) return null; // Do not render if the modal is not open
@@ -13,12 +13,15 @@ function RegistrationModal({ isOpen, onClose }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Validate passwords match
+    // Validate input fields
+    if (!username || !email || !password || !confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -35,18 +38,18 @@ function RegistrationModal({ isOpen, onClose }) {
         return;
       }
 
-      // Create the user with email and password
+      // Create user in Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Save additional user details (e.g., username) to Firestore
+      // Save user details to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         username,
         email,
         createdAt: new Date(),
       });
 
-      setSuccess('Registration successful');
+      console.log('User registered successfully');
       setError('');
       onClose(); // Close the modal after successful registration
     } catch (error) {
@@ -63,10 +66,9 @@ function RegistrationModal({ isOpen, onClose }) {
         </button>
         <h2>Register</h2>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleRegister}>
           <div className="form-group">
-            <label>Username</label>
+            <label>Username:</label>
             <input
               type="text"
               value={username}
@@ -76,7 +78,7 @@ function RegistrationModal({ isOpen, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label>Email</label>
+            <label>Email:</label>
             <input
               type="email"
               value={email}
@@ -86,7 +88,7 @@ function RegistrationModal({ isOpen, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label>Password:</label>
             <input
               type="password"
               value={password}
@@ -96,7 +98,7 @@ function RegistrationModal({ isOpen, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label>Confirm Password</label>
+            <label>Confirm Password:</label>
             <input
               type="password"
               value={confirmPassword}

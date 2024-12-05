@@ -1,25 +1,37 @@
-// frontend/src/App.jsx
-import React, { useState } from 'react';
+// src/App.jsx
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase'; // Ensure correct path
 import Header from './components/Header';
 import Footer from './components/Footer';
+import LoginModal from './components/LoginModal';
+import RegistrationModal from './components/RegistrationModal';
 import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-import ItemDetails from './components/ItemDetails';
-import LoginModal from './components/LoginModal';
-import RegistrationModal from './components/RegistrationModal';
-import Login from './components/Login'; // New standalone Login component
-import Register from './components/Register'; // New standalone Registration component
-import UserDashboard from './components/UserDashboard';
-import AdminDashboard from './components/AdminDashboard';
-import Account from './components/Account';
-import CreateItem from './components/CreateItem';
+// ... import other components as needed
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('User is logged in:', user.uid);
+        setCurrentUser(user);
+      } else {
+        console.log('No user is logged in');
+        setCurrentUser(null);
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   const openLoginModal = () => setIsLoginOpen(true);
   const closeLoginModal = () => setIsLoginOpen(false);
@@ -29,7 +41,11 @@ function App() {
 
   return (
     <Router>
-      <Header onLoginClick={openLoginModal} onRegisterClick={openRegistrationModal} />
+      <Header
+        onLoginClick={openLoginModal}
+        onRegisterClick={openRegistrationModal}
+        currentUser={currentUser} // Pass currentUser to Header
+      />
       <Routes>
         <Route
           path="/"
@@ -42,13 +58,7 @@ function App() {
           }
         />
         <Route path="/items" element={<ItemListings />} />
-        <Route path="/items/:id" element={<ItemDetails />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/create-item" element={<CreateItem />} />
-        <Route path="/login" element={<Login />} /> {/* Standalone Login */}
-        <Route path="/register" element={<Register />} /> {/* Standalone Registration */}
+        {/* ... other routes */}
       </Routes>
       <Footer />
       <LoginModal isOpen={isLoginOpen} onClose={closeLoginModal} />
