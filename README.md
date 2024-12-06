@@ -18,12 +18,12 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][https://github.com/alexisj890/FinalProject_323/graphs/contributors]
-[![Forks][forks-shield]][https://github.com/alexisj890/FinalProject_323/forks]
-[![Stargazers][stars-shield]][https://github.com/alexisj890/FinalProject_323/stargazers]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[![Contributors][contributors-shield]](https://github.com/alexisj890/FinalProject_323/graphs/contributors)
+[![Forks][forks-shield]](https://github.com/alexisj890/FinalProject_323/network/members)
+[![Stargazers][stars-shield]](https://github.com/alexisj890/FinalProject_323/stargazers)
+[![Issues][issues-shield]](https://github.com/alexisj890/FinalProject_323/issues)
+[![MIT License][license-shield]](https://github.com/alexisj890/FinalProject_323/blob/main/LICENSE)
+[![LinkedIn][linkedin-shield]](https://linkedin.com/in/your-linkedin-profile)
 
 
 
@@ -220,21 +220,13 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/alexisj890/FinalProject_323.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/alexisj890/FinalProject_323.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/alexisj890/FinalProject_323.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/alexisj890/FinalProject_323.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/alexisj890/FinalProject_323.svg?style=for-the-badge
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
+
 
 [Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
 [Vue-url]: https://vuejs.org/
