@@ -1,5 +1,3 @@
-// src/components/Account.jsx
-
 import React from 'react';
 
 function Account() {

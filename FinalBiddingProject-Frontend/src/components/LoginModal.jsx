@@ -1,9 +1,9 @@
 // src/components/LoginModal.jsx
 import React, { useState } from 'react';
-import './LoginModal.css'; // Optional: Add styles here
+import './LoginModal.css'; 
 
 function LoginModal({ isOpen, onClose }) {
-  if (!isOpen) return null; // Do not render if the modal is not open
+  if (!isOpen) return null; 
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -11,14 +11,13 @@ function LoginModal({ isOpen, onClose }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Perform login logic here
     if (!username || !password) {
       setError('Please enter both username and password');
     } else {
       setError('');
       console.log('Logging in with', { username, password });
-      // Example success:
-      onClose(); // Close the modal after successful login
+      
+      onClose(); 
     }
   };
 

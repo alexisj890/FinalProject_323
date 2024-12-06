@@ -1,6 +1,6 @@
 // src/components/Register.jsx
 import React, { useState } from 'react';
-import { auth, db } from '../firebase'; // Import Firebase services
+import { auth, db } from '../firebase'; 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
@@ -15,14 +15,14 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Check if passwords match
+    
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      // Check if username is unique
+      
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('username', '==', username));
       const querySnapshot = await getDocs(q);
@@ -32,11 +32,11 @@ function Register() {
         return;
       }
 
-      // Create user in Firebase Authentication
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Save user details to Firestore
+      
       await setDoc(doc(db, 'users', user.uid), {
         username,
         email,

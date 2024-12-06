@@ -1,12 +1,12 @@
-// src/components/RegistrationModal.jsx
+
 import React, { useState } from 'react';
-import { auth, db } from '../firebase'; // Import Firebase services
+import { auth, db } from '../firebase'; 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import './RegistrationModal.css'; // Include your styles
+import './RegistrationModal.css'; 
 
 function RegistrationModal({ isOpen, onClose }) {
-  if (!isOpen) return null; // Do not render if the modal is not open
+  if (!isOpen) return null; 
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ function RegistrationModal({ isOpen, onClose }) {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Validate input fields
+    
     if (!username || !email || !password || !confirmPassword) {
       setError('All fields are required');
       return;
@@ -28,7 +28,6 @@ function RegistrationModal({ isOpen, onClose }) {
     }
 
     try {
-      // Check if username is unique
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('username', '==', username));
       const querySnapshot = await getDocs(q);
@@ -38,11 +37,11 @@ function RegistrationModal({ isOpen, onClose }) {
         return;
       }
 
-      // Create user in Firebase Authentication
+     
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Save user details to Firestore
+      
       await setDoc(doc(db, 'users', user.uid), {
         username,
         email,
@@ -51,7 +50,7 @@ function RegistrationModal({ isOpen, onClose }) {
 
       console.log('User registered successfully');
       setError('');
-      onClose(); // Close the modal after successful registration
+      onClose(); 
     } catch (error) {
       console.error('Registration failed:', error.message);
       setError(error.message);

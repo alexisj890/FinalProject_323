@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase'; // Ensure correct path
+import { auth } from './firebase'; 
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -11,14 +11,13 @@ import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-// ... import other components as needed
+
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Listen for authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
