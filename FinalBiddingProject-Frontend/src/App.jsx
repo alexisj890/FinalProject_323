@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase'; 
+import { auth } from './firebase';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -11,13 +11,14 @@ import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-
+// Import other components as needed
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Listen for authentication changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -29,7 +30,7 @@ function App() {
       }
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
 
   const openLoginModal = () => setIsLoginOpen(true);
@@ -43,7 +44,8 @@ function App() {
       <Header
         onLoginClick={openLoginModal}
         onRegisterClick={openRegistrationModal}
-        currentUser={currentUser} // Pass currentUser to Header
+        currentUser={currentUser}
+        setCurrentUser={setCurrentUser} // Pass this for logout in Header
       />
       <Routes>
         <Route
@@ -57,11 +59,22 @@ function App() {
           }
         />
         <Route path="/items" element={<ItemListings />} />
-        {/* ... other routes */}
+        {/* Add other routes here */}
+        <Route
+          path="*"
+          element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
+        />
       </Routes>
       <Footer />
-      <LoginModal isOpen={isLoginOpen} onClose={closeLoginModal} />
-      <RegistrationModal isOpen={isRegistrationOpen} onClose={closeRegistrationModal} />
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={closeLoginModal}
+        setCurrentUser={setCurrentUser} // Ensure the modal can update the user
+      />
+      <RegistrationModal
+        isOpen={isRegistrationOpen}
+        onClose={closeRegistrationModal}
+      />
     </Router>
   );
 }
