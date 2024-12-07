@@ -51,7 +51,9 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
           {currentUser ? (
             <>
               <li>
-                <span>Welcome, {username || 'User'}</span>
+                <Link to="/profile" className="nav-username">
+                  Welcome, {username || 'User'}
+                </Link>
               </li>
               <li>
                 <button onClick={handleLogout} className="nav-button">
