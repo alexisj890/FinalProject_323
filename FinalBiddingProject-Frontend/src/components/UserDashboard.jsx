@@ -1,7 +1,6 @@
 import React from 'react';
 
 function UserDashboard() {
-  // Fetch user data, transactions, ratings, etc.
 
   return (
     <div className="user-dashboard">
