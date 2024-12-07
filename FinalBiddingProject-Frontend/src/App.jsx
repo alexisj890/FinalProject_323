@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -11,14 +10,13 @@ import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-// Import other components as needed
+import Profile from './components/Profile'; 
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Listen for authentication changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -30,7 +28,7 @@ function App() {
       }
     });
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   const openLoginModal = () => setIsLoginOpen(true);
@@ -45,7 +43,7 @@ function App() {
         onLoginClick={openLoginModal}
         onRegisterClick={openRegistrationModal}
         currentUser={currentUser}
-        setCurrentUser={setCurrentUser} // Pass this for logout in Header
+        setCurrentUser={setCurrentUser}
       />
       <Routes>
         <Route
@@ -59,7 +57,7 @@ function App() {
           }
         />
         <Route path="/items" element={<ItemListings />} />
-        {/* Add other routes here */}
+        <Route path="/profile" element={<Profile />} /> {/* Add Profile route */}
         <Route
           path="*"
           element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
@@ -69,7 +67,7 @@ function App() {
       <LoginModal
         isOpen={isLoginOpen}
         onClose={closeLoginModal}
-        setCurrentUser={setCurrentUser} // Ensure the modal can update the user
+        setCurrentUser={setCurrentUser}
       />
       <RegistrationModal
         isOpen={isRegistrationOpen}
