@@ -40,7 +40,9 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
   return (
     <header className="header">
       <nav className="nav-bar">
-        <h1 className="brand">TEAM R BIDDING</h1>
+        <h1 className="brand">
+          <Link to="/" className="brand-link">TEAM R BIDDING</Link>
+        </h1>
         <ul className="nav-links">
           <li>
             <Link to="/">Home</Link>

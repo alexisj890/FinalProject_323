@@ -1,4 +1,3 @@
-
 .header {
   background-color: #333;
   color: white;
@@ -14,6 +13,20 @@
 .brand {
   font-size: 1.5rem;
   font-weight: bold;
+  color: red; /* The brand text is red */
+}
+
+.brand-link {
+  color: red; /* Ensures the brand link is always red */
+  text-decoration: none;
+}
+
+.brand-link:hover {
+  text-decoration: underline; /* Adds an underline on hover */
+}
+
+.brand-link:visited {
+  color: red; /* Prevents the brand link from turning purple */
 }
 
 .nav-links {
@@ -33,6 +46,10 @@
 
 .nav-links a:hover {
   text-decoration: underline;
+}
+
+.nav-links a:visited {
+  color: white; /* Prevents navigation links from turning purple */
 }
 
 .nav-button {
