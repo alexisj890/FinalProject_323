@@ -10,7 +10,8 @@ import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-import Profile from './components/Profile'; 
+import Profile from './components/Profile';
+import MoreInfo from './components/MoreInfo'; // Import MoreInfo component
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -57,7 +58,8 @@ function App() {
           }
         />
         <Route path="/items" element={<ItemListings />} />
-        <Route path="/profile" element={<Profile />} /> {/* Add Profile route */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/more-info" element={<MoreInfo />} /> {/* Add MoreInfo route */}
         <Route
           path="*"
           element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
