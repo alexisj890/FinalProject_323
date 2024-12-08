@@ -2,12 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 
-function Header({ onLoginClick, onRegisterClick, currentUser }) {
+function Header({ onLoginClick, onRegisterClick, currentUser, onLogout }) {
   return (
     <header className="header">
       <nav className="nav-bar">
         <h1 className="brand">TEAM R BIDDING</h1>
         <ul className="nav-links">
+          {/* Navigation Links */}
           <li>
             <Link to="/">Home</Link>
           </li>
@@ -16,13 +17,26 @@ function Header({ onLoginClick, onRegisterClick, currentUser }) {
           </li>
           {currentUser ? (
             <>
+              {/* Welcome Message */}
               <li>
                 <span>Welcome, {currentUser.email}</span>
               </li>
-              {/* Include a logout option or user dashboard link */}
+              {/* Create Item Link */}
+              <li>
+                <Link to="/create-item" className="nav-button">
+                  Create Listing
+                </Link>
+              </li>
+              {/* Logout Button */}
+              <li>
+                <button onClick={onLogout} className="nav-button">
+                  Logout
+                </button>
+              </li>
             </>
           ) : (
             <>
+              {/* Login and Register Buttons */}
               <li>
                 <button onClick={onLoginClick} className="nav-button">
                   Login
