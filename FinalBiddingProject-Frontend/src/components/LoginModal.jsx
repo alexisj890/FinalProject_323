@@ -17,9 +17,9 @@ function LoginModal({ isOpen, onClose, setCurrentUser }) {
     try {
       let email = identifier;
 
-      // Check if the identifier is not an email (assume it's a username)
+      
       if (!identifier.includes('@')) {
-        // Fetch email from Firestore based on username
+        
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('username', '==', identifier));
         const querySnapshot = await getDocs(q);
@@ -45,7 +45,7 @@ function LoginModal({ isOpen, onClose, setCurrentUser }) {
       setCurrentUser({ ...user, username: userData?.username });
 
       console.log('Login successful');
-      onClose(); // Close the modal
+      onClose(); 
     } catch (error) {
       console.error('Login failed:', error.message);
       setError('Invalid username/email or password');
