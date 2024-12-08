@@ -11,7 +11,8 @@ import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
 import Profile from './components/Profile';
-import MoreInfo from './components/MoreInfo'; // Import MoreInfo component
+import MoreInfo from './components/MoreInfo';
+import VerificationQuestion from './components/VerificationQuestion';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -60,10 +61,12 @@ function App() {
         <Route path="/items" element={<ItemListings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/more-info" element={<MoreInfo />} /> {/* Add MoreInfo route */}
+        <Route path="/verification-question" element={<VerificationQuestion />} />
         <Route
           path="*"
           element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
         />
+
       </Routes>
       <Footer />
       <LoginModal
