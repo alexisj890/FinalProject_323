@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link for navigation
 
+// ADD AN ALERT TO THE QUESTION BUTTON IF NOT LOGGED IN
 function UserTypes() {
   return (
     <section id="user-types">

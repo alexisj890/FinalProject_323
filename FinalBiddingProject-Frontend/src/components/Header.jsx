@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -5,9 +6,6 @@ import { auth, db } from '../firebase'; // Ensure correct paths
 import { doc, getDoc } from 'firebase/firestore';
 import './Header.css';
 
-<<<<<<< HEAD
-function Header({ onLoginClick, onRegisterClick, currentUser, onLogout }) {
-=======
 function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) {
   const [username, setUsername] = React.useState('');
 
@@ -39,7 +37,6 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
     }
   };
 
->>>>>>> 8cabb40dfcd9c23c64848d3bd6c15fc2e49301c4
   return (
     <header className="header">
       <nav className="nav-bar">
@@ -47,7 +44,6 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
           <Link to="/" className="brand-link">TEAM R BIDDING</Link>
         </h1>
         <ul className="nav-links">
-          {/* Navigation Links */}
           <li>
             <Link to="/">Home</Link>
           </li>
@@ -56,7 +52,6 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
           </li>
           {currentUser ? (
             <>
-              {/* Welcome Message */}
               <li>
                 <Link to="/profile" className="nav-username">
                   Welcome, {username || 'User'}
@@ -67,25 +62,9 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
                   Logout
                 </button>
               </li>
-<<<<<<< HEAD
-              {/* Create Item Link */}
-              <li>
-                <Link to="/create-item" className="nav-button">
-                  Create Listing
-                </Link>
-              </li>
-              {/* Logout Button */}
-              <li>
-                <button onClick={onLogout} className="nav-button">
-                  Logout
-                </button>
-              </li>
-=======
->>>>>>> 8cabb40dfcd9c23c64848d3bd6c15fc2e49301c4
             </>
           ) : (
             <>
-              {/* Login and Register Buttons */}
               <li>
                 <button onClick={onLoginClick} className="nav-button">
                   Login
