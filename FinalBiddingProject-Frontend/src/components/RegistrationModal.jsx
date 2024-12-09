@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { auth, db } from '../firebase'; 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -17,9 +16,13 @@ function RegistrationModal({ isOpen, onClose }) {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    
+    // Validate input fields
     if (!username || !email || !password || !confirmPassword) {
       setError('All fields are required');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
       return;
     }
     if (password !== confirmPassword) {
@@ -28,6 +31,7 @@ function RegistrationModal({ isOpen, onClose }) {
     }
 
     try {
+      // Check if username is already taken
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('username', '==', username));
       const querySnapshot = await getDocs(q);
@@ -37,11 +41,11 @@ function RegistrationModal({ isOpen, onClose }) {
         return;
       }
 
-     
+      // Register user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      
+      // Save user data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         username,
         email,
@@ -50,7 +54,7 @@ function RegistrationModal({ isOpen, onClose }) {
 
       console.log('User registered successfully');
       setError('');
-      onClose(); 
+      onClose(); // Close modal on success
     } catch (error) {
       console.error('Registration failed:', error.message);
       setError(error.message);
@@ -93,7 +97,7 @@ function RegistrationModal({ isOpen, onClose }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder="Enter your password (min 8 characters)"
             />
           </div>
           <div className="form-group">
