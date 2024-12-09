@@ -1,8 +1,7 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase'; 
+import { auth } from './firebase';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -11,7 +10,10 @@ import Banner from './components/Banner';
 import Features from './components/Features';
 import UserTypes from './components/UserTypes';
 import ItemListings from './components/ItemListings';
-
+import Profile from './components/Profile';
+import MoreInfo from './components/MoreInfo';
+import VerificationQuestion from './components/VerificationQuestion';
+import { Navigate } from 'react-router-dom';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -21,20 +23,16 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log('User is logged in:', user.uid);
         setCurrentUser(user);
       } else {
-        console.log('No user is logged in');
         setCurrentUser(null);
       }
     });
-
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
   const openLoginModal = () => setIsLoginOpen(true);
   const closeLoginModal = () => setIsLoginOpen(false);
-
   const openRegistrationModal = () => setIsRegistrationOpen(true);
   const closeRegistrationModal = () => setIsRegistrationOpen(false);
 
@@ -43,7 +41,8 @@ function App() {
       <Header
         onLoginClick={openLoginModal}
         onRegisterClick={openRegistrationModal}
-        currentUser={currentUser} // Pass currentUser to Header
+        currentUser={currentUser}
+        setCurrentUser={setCurrentUser}
       />
       <Routes>
         <Route
@@ -57,11 +56,33 @@ function App() {
           }
         />
         <Route path="/items" element={<ItemListings />} />
-        {/* ... other routes */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/more-info" element={<MoreInfo />} />
+        <Route
+          path="/verification-question"
+          element={
+            currentUser ? (
+              <VerificationQuestion currentUser={currentUser} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="*"
+          element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
+        />
       </Routes>
       <Footer />
-      <LoginModal isOpen={isLoginOpen} onClose={closeLoginModal} />
-      <RegistrationModal isOpen={isRegistrationOpen} onClose={closeRegistrationModal} />
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={closeLoginModal}
+        setCurrentUser={setCurrentUser}
+      />
+      <RegistrationModal
+        isOpen={isRegistrationOpen}
+        onClose={closeRegistrationModal}
+      />
     </Router>
   );
 }

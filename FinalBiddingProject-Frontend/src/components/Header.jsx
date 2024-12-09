@@ -1,12 +1,51 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../firebase'; // Ensure correct paths
+import { doc, getDoc } from 'firebase/firestore';
 import './Header.css';
 
+<<<<<<< HEAD
 function Header({ onLoginClick, onRegisterClick, currentUser, onLogout }) {
+=======
+function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) {
+  const [username, setUsername] = React.useState('');
+
+  // Fetch the username from Firestore
+  React.useEffect(() => {
+    if (currentUser) {
+      const fetchUsername = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            setUsername(userDoc.data().username);
+          }
+        } catch (error) {
+          console.error('Error fetching username:', error);
+        }
+      };
+      fetchUsername();
+    }
+  }, [currentUser]);
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setCurrentUser(null); // Clear the current user in parent state
+      console.log('User logged out');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+>>>>>>> 8cabb40dfcd9c23c64848d3bd6c15fc2e49301c4
   return (
     <header className="header">
       <nav className="nav-bar">
-        <h1 className="brand">TEAM R BIDDING</h1>
+        <h1 className="brand">
+          <Link to="/" className="brand-link">TEAM R BIDDING</Link>
+        </h1>
         <ul className="nav-links">
           {/* Navigation Links */}
           <li>
@@ -19,8 +58,16 @@ function Header({ onLoginClick, onRegisterClick, currentUser, onLogout }) {
             <>
               {/* Welcome Message */}
               <li>
-                <span>Welcome, {currentUser.email}</span>
+                <Link to="/profile" className="nav-username">
+                  Welcome, {username || 'User'}
+                </Link>
               </li>
+              <li>
+                <button onClick={handleLogout} className="nav-button">
+                  Logout
+                </button>
+              </li>
+<<<<<<< HEAD
               {/* Create Item Link */}
               <li>
                 <Link to="/create-item" className="nav-button">
@@ -33,6 +80,8 @@ function Header({ onLoginClick, onRegisterClick, currentUser, onLogout }) {
                   Logout
                 </button>
               </li>
+=======
+>>>>>>> 8cabb40dfcd9c23c64848d3bd6c15fc2e49301c4
             </>
           ) : (
             <>

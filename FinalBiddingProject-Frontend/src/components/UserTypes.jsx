@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 function UserTypes() {
   return (
@@ -9,7 +10,9 @@ function UserTypes() {
         <p>
           Browse listings and provide comments. Apply to become a User by answering a human verification question.
         </p>
-        <button>Question</button>
+        <Link to="/verification-question">
+          <button>Question</button>
+        </Link>
       </div>
       <div className="user-type">
         <h3>Users</h3>
@@ -21,7 +24,11 @@ function UserTypes() {
         <h3>Super-users</h3>
         <p>
           Approve new user applications, handle complaints, and manage user suspensions.
+          To achieve Super User Status and check more information click on the link below.
         </p>
+        <Link to="/more-info">
+          <button>MORE INFO</button>
+        </Link>
       </div>
     </section>
   );
