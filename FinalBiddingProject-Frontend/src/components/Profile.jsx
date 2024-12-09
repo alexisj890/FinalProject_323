@@ -1,4 +1,3 @@
-// src/components/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
@@ -11,7 +10,7 @@ function Profile() {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!auth.currentUser) {
-        navigate('/'); // Redirect to home if no user is logged in
+        navigate('/'); 
         return;
       }
 
@@ -35,10 +34,14 @@ function Profile() {
   }
 
   return (
+    //Need to implement the previous Transactions and a link to the cart, work on that soon.
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>Profile</h1>
       <p><strong>Username:</strong> {userData.username}</p>
       <p><strong>Email:</strong> {auth.currentUser.email}</p>
+      <p><strong>Current Role:</strong> {userData.role === 'user' ? 'Verified User' : 'Visitor'}</p>
+      <p><strong>Transactions:</strong></p> 
+      <p><strong>Cart:</strong></p>
     </div>
   );
 }

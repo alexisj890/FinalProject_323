@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { doc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
-// Questions array
+// Questions array from SampleBench, feel free to add more
 const questions = [
   {
     question: "You are an expert at reasoning and you always pick the most realistic answer. Think step by step and output your reasoning followed by your final answer using the following format: Final Answer: X where X is one of the letters A, B, C, D, E, or F.\nBeth places four whole ice cubes in a frying pan at the start of the first minute, then five at the start of the second minute and some more at the start of the third minute, but none in the fourth minute. If the average number of ice cubes per minute placed in the pan while it was frying a crispy egg was five, how many whole ice cubes can be found in the pan at the end of the third minute?\nA. 30\nB. 0\nC. 20\nD. 10\nE. 11\nF. 5\n",
@@ -142,15 +144,21 @@ function VerificationQuestion({ currentUser }) {
     }
   }, [timeLeft]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (answer.toUpperCase() === currentQuestion.correctAnswer) {
       setFeedback('Correct! You are now verified as a User.');
-      setIsUser(true);
+      try {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, { role: 'user' });
+        setIsUser(true); 
+      } catch (error) {
+        console.error('Error updating user role:', error);
+      }
     } else {
-      setFeedback('Incorrect answer. Please try again.');
+      setFeedback('Incorrect answer. Please try again in 5 minutes.');
       setCooldown(true);
-      setTimeLeft(5 * 60);
+      setTimeLeft(5 * 60); 
     }
   };
 
@@ -159,7 +167,7 @@ function VerificationQuestion({ currentUser }) {
   }
 
   if (!currentQuestion) return <p>Loading...</p>;
-
+  //Cooldown needs to be fixed so that reload does not disrupt it.
   return (
     <section id="verification-question">
       <h2>Human Verification Question</h2>
