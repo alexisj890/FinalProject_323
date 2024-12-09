@@ -18,7 +18,7 @@ function ItemListings() {
 
   return (
     <div className="item-listings">
-      <h2>Available Items</h2>
+      <h2>Current Available Items</h2>
       <div className="item-listings-grid">
         {items.map((item) => (
           <ItemCard key={item._id} item={item} />
