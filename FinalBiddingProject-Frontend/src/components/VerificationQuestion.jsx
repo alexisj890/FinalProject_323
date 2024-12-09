@@ -122,11 +122,25 @@ function VerificationQuestion({ currentUser }) {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
   const [isUser, setIsUser] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * questions.length);
     setCurrentQuestion(questions[randomIndex]);
   }, []);
+
+  
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+      return () => clearInterval(timer); 
+    } else if (timeLeft === 0) {
+      setCooldown(false);
+    }
+  }, [timeLeft]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -135,6 +149,8 @@ function VerificationQuestion({ currentUser }) {
       setIsUser(true);
     } else {
       setFeedback('Incorrect answer. Please try again.');
+      setCooldown(true);
+      setTimeLeft(5 * 60);
     }
   };
 
@@ -148,7 +164,7 @@ function VerificationQuestion({ currentUser }) {
     <section id="verification-question">
       <h2>Human Verification Question</h2>
       <p>{currentQuestion.question}</p>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} disabled={cooldown}>
         {currentQuestion.options.map((option, index) => (
           <div key={index}>
             <label>
@@ -157,6 +173,7 @@ function VerificationQuestion({ currentUser }) {
                 name="answer"
                 value={option[0]}
                 onChange={(e) => setAnswer(e.target.value)}
+                disabled={cooldown}
               />
               {option}
             </label>
@@ -164,6 +181,11 @@ function VerificationQuestion({ currentUser }) {
         ))}
         <button type="submit">Submit</button>
       </form>
+       {cooldown && (
+        <p className="cooldown-timer">
+          You can try again in {Math.floor(timeLeft / 60)}:{`0${timeLeft % 60}`.slice(-2)} minutes.
+        </p>
+      )}
       {feedback && <p>{feedback}</p>}
       {isUser && <p className="user-tag">Status: User</p>}
     </section>
