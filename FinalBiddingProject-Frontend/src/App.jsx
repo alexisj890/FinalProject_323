@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import Header from './components/Header';
@@ -13,7 +13,7 @@ import ItemListings from './components/ItemListings';
 import Profile from './components/Profile';
 import MoreInfo from './components/MoreInfo';
 import VerificationQuestion from './components/VerificationQuestion';
-import { Navigate } from 'react-router-dom';
+import Comments from './components/Comments'; // Import the Comments component
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -70,6 +70,8 @@ function App() {
             )
           }
         />
+        {/* New route for the Comments component */}
+        <Route path="/items/:id/comments" element={<Comments />} />
         <Route
           path="*"
           element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
