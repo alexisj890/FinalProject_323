@@ -1,79 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './ItemCard.css'; // Ensure this is the correct path to your CSS file
 
 function ItemCard({ item }) {
   const { _id, title, price, imageUrl } = item;
 
   return (
-    <div
-      className="item-card"
-      style={{
-        border: '1px solid #ddd',
-        borderRadius: '10px',
-        padding: '16px',
-        margin: '8px', // Reduced margin
-        backgroundColor: '#fff',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
-    >
-      <img
-        src={imageUrl}
-        alt={title}
-        style={{
-          width: '100%',
-          height: '200px',
-          objectFit: 'cover',
-          borderRadius: '8px',
-          marginBottom: '12px', // Reduced margin
-        }}
-      />
-      <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '6px' }}>
-        {title}
-      </h3>
-      <p
-        style={{
-          fontSize: '16px',
-          color: '#007bff',
-          fontWeight: '600',
-          marginBottom: '8px', // Reduced margin
-        }}
-      >
-        ${price}
-      </p>
-      <div
-        style={{
-          marginTop: 'auto',
-        }}
-      >
-        <Link
-          to={`/items/${_id}`}
-          style={{
-            display: 'block',
-            color: '#007bff',
-            textDecoration: 'none',
-            fontWeight: '500',
-            marginBottom: '6px', // Reduced spacing between links
-          }}
-          onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
-          onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
-        >
+    <div className="item-card">
+      <img src={imageUrl} alt={title} />
+      <h3>{title}</h3>
+      <p className="price">${price}</p>
+      <div className="button-container">
+        <Link to={`/items/${_id}`} className="view-details-button">
           View Details
         </Link>
-        <Link
-          to={`/items/${_id}/comments`}
-          style={{
-            display: 'block',
-            color: '#007bff',
-            textDecoration: 'none',
-            fontWeight: '500',
-          }}
-          onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
-          onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
-        >
+        <Link to={`/items/${_id}/comments`} className="view-comments-link">
           View Comments
         </Link>
       </div>

@@ -7,7 +7,7 @@
   flex-direction: column;
   justify-content: space-between;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-  height: 100%; /* Ensure all cards stretch to the same height */
+  height: 100%;
 }
 
 .item-card:hover {
@@ -18,59 +18,58 @@
 /* Image styling */
 .item-card img {
   width: 100%;
-  height: 180px; /* Fixed height for uniformity */
+  height: 320px; /* Larger image size */
   object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  border-radius: 12px; /* Rounded corners for a modern look */
+  margin-bottom: 0.5rem; /* Spacing between the image and title */
 }
 
 /* Title styling */
 .item-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 0.25rem; /* Reduced margin */
-  text-align: center; /* Center-align the text */
+  text-align: center;
+  margin-bottom: 0.25rem; /* Reduce space below title */
 }
 
 /* Price styling */
 .item-card .price {
   color: #007bff;
   font-weight: bold;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
   text-align: center;
+  margin-bottom: 0.5rem; /* Slightly reduce space below price */
 }
 
-/* Button container for alignment */
+/* Button container styling */
 .item-card .button-container {
-  margin-top: auto; /* Push buttons to the bottom */
   display: flex;
-  flex-direction: column; /* Stack buttons vertically */
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.5rem; /* Even spacing between buttons */
+  margin-top: auto; /* Push buttons to the bottom */
 }
 
-/* Buttons */
+/* Button styling */
 .item-card .button-container a {
   text-decoration: none;
-  color: #007bff;
+  color: white;
+  background-color: #007bff;
   font-size: 0.9rem;
   font-weight: 500;
-  padding: 0.3rem 0.6rem;
+  padding: 0.6rem 0;
   text-align: center;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: background-color 0.3s ease;
 }
 
 .item-card .button-container a:hover {
-  text-decoration: underline;
+  background-color: #0056b3;
 }
 
 /* Grid styling */
 .item-listings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted for smaller card widths */
+  gap: 1.5rem; /* Balanced spacing between cards */
   padding: 1rem;
 }
-
-
