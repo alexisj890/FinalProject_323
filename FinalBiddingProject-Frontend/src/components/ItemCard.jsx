@@ -2,24 +2,81 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function ItemCard({ item }) {
-  const { _id, title, price, imageUrl, description } = item;
+  const { _id, title, price, imageUrl } = item;
 
   return (
-    <div className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+    <div
+      className="item-card"
+      style={{
+        border: '1px solid #ddd',
+        borderRadius: '10px',
+        padding: '16px',
+        margin: '8px', // Reduced margin
+        backgroundColor: '#fff',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
+    >
       <img
         src={imageUrl}
         alt={title}
-        className="w-full h-48 object-cover rounded-md mb-4"
+        style={{
+          width: '100%',
+          height: '200px',
+          objectFit: 'cover',
+          borderRadius: '8px',
+          marginBottom: '12px', // Reduced margin
+        }}
       />
-      <h3 className="text-lg font-bold">{title}</h3>
-      <p className="text-gray-600 truncate">{description}</p>
-      <p className="text-blue-500 font-semibold mt-2">${price}</p>
-      <Link
-        to={'/items/${_id}/comments'}
-        className="text-blue-500 hover:underline mt-4 inline-block"
+      <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '6px' }}>
+        {title}
+      </h3>
+      <p
+        style={{
+          fontSize: '16px',
+          color: '#007bff',
+          fontWeight: '600',
+          marginBottom: '8px', // Reduced margin
+        }}
       >
-        View Comments
-      </Link>
+        ${price}
+      </p>
+      <div
+        style={{
+          marginTop: 'auto',
+        }}
+      >
+        <Link
+          to={`/items/${_id}`}
+          style={{
+            display: 'block',
+            color: '#007bff',
+            textDecoration: 'none',
+            fontWeight: '500',
+            marginBottom: '6px', // Reduced spacing between links
+          }}
+          onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
+          onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
+        >
+          View Details
+        </Link>
+        <Link
+          to={`/items/${_id}/comments`}
+          style={{
+            display: 'block',
+            color: '#007bff',
+            textDecoration: 'none',
+            fontWeight: '500',
+          }}
+          onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
+          onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
+        >
+          View Comments
+        </Link>
+      </div>
     </div>
   );
 }

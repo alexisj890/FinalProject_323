@@ -13,7 +13,7 @@ import ItemListings from './components/ItemListings';
 import Profile from './components/Profile';
 import MoreInfo from './components/MoreInfo';
 import VerificationQuestion from './components/VerificationQuestion';
-import Comments from './components/Comments'; // Import the Comments component
+import Comments from './components/Comments';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -40,53 +40,54 @@ function App() {
 
   return (
     <Router>
-      <Header
-        onLoginClick={openLoginModal}
-        onRegisterClick={openRegistrationModal}
-        currentUser={currentUser}
-        setCurrentUser={setCurrentUser}
-      />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Banner />
-              <Features />
-              <UserTypes currentUser={currentUser} />
-            </>
-          }
+      <div className="App">
+        <Header
+          onLoginClick={openLoginModal}
+          onRegisterClick={openRegistrationModal}
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
         />
-        <Route path="/items" element={<ItemListings />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/more-info" element={<MoreInfo />} />
-        <Route
-          path="/verification-question"
-          element={
-            currentUser ? (
-              <VerificationQuestion currentUser={currentUser} />
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <Banner />
+                <Features />
+                <UserTypes currentUser={currentUser} />
+              </>
+            }
+          />
+          <Route path="/items" element={<ItemListings />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/more-info" element={<MoreInfo />} />
+          <Route
+            path="/verification-question"
+            element={
+              currentUser ? (
+                <VerificationQuestion currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          <Route path="/items/:id/comments" element={<Comments />} />
+          <Route
+            path="*"
+            element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
+          />
+        </Routes>
+        <Footer />
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={closeLoginModal}
+          setCurrentUser={setCurrentUser}
         />
-        {/* New route for the Comments component */}
-        <Route path="/items/:id/comments" element={<Comments />} />
-        <Route
-          path="*"
-          element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
+        <RegistrationModal
+          isOpen={isRegistrationOpen}
+          onClose={closeRegistrationModal}
         />
-      </Routes>
-      <Footer />
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={closeLoginModal}
-        setCurrentUser={setCurrentUser}
-      />
-      <RegistrationModal
-        isOpen={isRegistrationOpen}
-        onClose={closeRegistrationModal}
-      />
+      </div>
     </Router>
   );
 }
