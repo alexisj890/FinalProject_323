@@ -23,12 +23,14 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log('User is logged in:', user); // Debug log
         setCurrentUser(user);
       } else {
+        console.log('No user logged in'); // Debug log
         setCurrentUser(null);
       }
     });
-    return () => unsubscribe();
+    return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
 
   const openLoginModal = () => setIsLoginOpen(true);
@@ -51,7 +53,7 @@ function App() {
             <>
               <Banner />
               <Features />
-              <UserTypes />
+              <UserTypes currentUser={currentUser} />
             </>
           }
         />
