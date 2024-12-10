@@ -14,6 +14,7 @@ import Profile from './components/Profile';
 import MoreInfo from './components/MoreInfo';
 import VerificationQuestion from './components/VerificationQuestion';
 import Comments from './components/Comments';
+import TransactionRating from './components/TransactionRating'; // Import TransactionRating
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -72,6 +73,7 @@ function App() {
             }
           />
           <Route path="/items/:id/comments" element={<Comments />} />
+          <Route path="/Ratings" element={<TransactionRating />} /> {/* New route */}
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
