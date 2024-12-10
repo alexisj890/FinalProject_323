@@ -15,7 +15,7 @@ function ItemCard({ item }) {
       <p className="text-gray-600 truncate">{description}</p>
       <p className="text-blue-500 font-semibold mt-2">${price}</p>
       <Link
-        to={/items/${_id}/comments}
+        to={'/items/${_id}/comments'}
         className="text-blue-500 hover:underline mt-4 inline-block"
       >
         View Comments
