@@ -9,12 +9,18 @@ function Comments() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [error, setError] = useState(null);
+  const [isFetching, setIsFetching] = useState(true); // Track if data is being fetched
 
   useEffect(() => {
+    // Fetch comments for the specific item
     axios
       .get(`http://localhost:5000/items/${id}/comments`)
-      .then((response) => setComments(response.data))
-      .catch(() => setError('Error fetching comments'));
+      .then((response) => {
+        setComments(response.data);
+        setError(null); // Clear any errors
+      })
+      .catch(() => setError('Error fetching comments'))
+      .finally(() => setIsFetching(false)); // Mark fetching as completed
   }, [id]);
 
   const handleAddComment = (e) => {
@@ -26,6 +32,7 @@ function Comments() {
       .then((response) => {
         setComments([...comments, response.data]);
         setNewComment('');
+        setError(null); // Clear any previous errors
       })
       .catch(() => setError('Error adding comment'));
   };
@@ -33,18 +40,23 @@ function Comments() {
   return (
     <div className="comments-container">
       <h2 className="comments-title">Comments</h2>
-      {error && <p className="error-message">{error}</p>}
+
+      {/* Show error only if there's a real fetching error */}
+      {error && isFetching && <p className="error-message">{error}</p>}
+
 
       {/* Display existing comments */}
       <div className="comments-list">
-        {comments.length > 0 ? (
+        {!isFetching && comments.length > 0 ? (
           comments.map((comment, index) => (
             <div key={index} className="comment">
               <p>{comment.text}</p>
             </div>
           ))
-        ) : (
+        ) : !isFetching && comments.length === 0 ? (
           <p className="no-comments">No comments yet. Be the first to comment!</p>
+        ) : (
+          <p className="loading-message">Loading comments...</p>
         )}
       </div>
 
