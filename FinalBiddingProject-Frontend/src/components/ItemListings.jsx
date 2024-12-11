@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ItemListings.css'; // Import the CSS file
 import ItemCard from './ItemCard';
+import { Link } from 'react-router-dom';
 
 function ItemListings() {
   const [items, setItems] = useState([]);
@@ -48,6 +49,11 @@ function ItemListings() {
         {items.map((item) => (
           <ItemCard key={item._id} item={item} />
         ))}
+      </div>
+      <div className="button-container">
+        <Link to={"/CreateItem"} className="view-CreateItem">
+          Create Item
+        </Link>
       </div>
     </div>
   );
