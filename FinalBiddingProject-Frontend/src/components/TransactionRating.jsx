@@ -16,6 +16,9 @@ function TransactionRating() {
       alert("Please select a rating before submitting.");
       return;
     }
+    else{
+      alert("Thank you for your rating!");
+    }
 
     const transactionData = {
       rating
@@ -23,7 +26,7 @@ function TransactionRating() {
 
     console.log("Transaction Rating Submitted:", transactionData);
 
-    navigate("/thank-you");
+    navigate("/items");
   };
 
   return (
