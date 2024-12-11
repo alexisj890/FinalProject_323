@@ -45,7 +45,7 @@ function TransactionRating() {
           </div>
         </div>
         <button type="submit" className="submit-button">
-          Submit Rating
+          Rating
         </button>
       </form>
     </div>
