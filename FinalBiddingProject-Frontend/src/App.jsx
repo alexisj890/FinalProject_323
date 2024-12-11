@@ -14,7 +14,10 @@ import Profile from './components/Profile';
 import MoreInfo from './components/MoreInfo';
 import VerificationQuestion from './components/VerificationQuestion';
 import Comments from './components/Comments';
-import TransactionRating from './components/TransactionRating'; // Import TransactionRating
+import TransactionRating from './components/TransactionRating';
+import Sidebar from './components/Sidebar';
+import Deposit from './components/Deposit';
+import Withdraw from './components/Withdraw';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -78,6 +81,8 @@ function App() {
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
           />
+          <Route path="/deposit" element={<Deposit />} />
+          <Route path="/withdraw" element={<Withdraw />} />
         </Routes>
         <Footer />
         <LoginModal
