@@ -25,6 +25,15 @@ function App() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // State for newly created items
+  const [newItems, setNewItems] = useState([]);
+
+  // Add new items to the state
+  const addItem = (newItem) => {
+    setNewItems((prevItems) => [...prevItems, newItem]);
+  };
+
+  // Firebase Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -38,6 +47,7 @@ function App() {
     return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
 
+  // Modal Handlers
   const openLoginModal = () => setIsLoginOpen(true);
   const closeLoginModal = () => setIsLoginOpen(false);
   const openRegistrationModal = () => setIsRegistrationOpen(true);
@@ -63,7 +73,14 @@ function App() {
               </>
             }
           />
-          <Route path="/items" element={<ItemListings />} />
+          <Route
+            path="/items"
+            element={<ItemListings newItems={newItems} />} // Pass new items to ItemListings
+          />
+          <Route
+            path="/create-item"
+            element={<CreateItem addItem={addItem} />} // Updated route with addItem prop
+          />
           <Route path="/profile" element={<Profile />} />
           <Route path="/more-info" element={<MoreInfo />} />
           <Route
@@ -77,13 +94,13 @@ function App() {
             }
           />
           <Route path="/items/:id/comments" element={<Comments />} />
-          <Route path="/Ratings" element={<TransactionRating />} /> {/* New route */}
+          <Route path="/Ratings" element={<TransactionRating />} />
+          <Route path="/deposit" element={<Deposit />} />
+          <Route path="/withdraw" element={<Withdraw />} />
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
           />
-          <Route path="/deposit" element={<Deposit />} />
-          <Route path="/withdraw" element={<Withdraw />} />
         </Routes>
         <Footer />
         <LoginModal

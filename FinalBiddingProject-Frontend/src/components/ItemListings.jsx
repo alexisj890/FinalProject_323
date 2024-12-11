@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './ItemListings.css'; // Import the CSS file
 import ItemCard from './ItemCard';
 import { Link } from 'react-router-dom';
 
-function ItemListings() {
+function ItemListings({ newItems }) {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // Hardcoded items for testing
   const hardcodedItems = [
     {
       _id: '1',
       title: '2021 Tesla Model S',
-      description: 'A pristine Tesla Model S with 20,000 miles, full self-driving capabilities, and a sleek red exterior.',
+      description:
+        'A pristine Tesla Model S with 20,000 miles, full self-driving capabilities, and a sleek red exterior.',
       price: 79999,
       imageUrl: 'https://via.placeholder.com/300?text=Tesla+Model+S',
     },
@@ -32,26 +32,21 @@ function ItemListings() {
     },
   ];
 
+  // Combine hardcoded items with new ones passed as props
   useEffect(() => {
-    // Simulate data fetching
-    setTimeout(() => {
-      setItems(hardcodedItems);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  if (loading) return <p>Loading items...</p>;
+    setItems([...hardcodedItems, ...newItems]);
+  }, [newItems]);
 
   return (
     <div className="item-listings">
       <h2>Available Items</h2>
       <div className="item-listings-grid">
-        {items.map((item) => (
-          <ItemCard key={item._id} item={item} />
+        {items.map((item, index) => (
+          <ItemCard key={item._id || index} item={item} />
         ))}
       </div>
       <div className="button-container">
-        <Link to={"/CreateItem"} className="view-CreateItem">
+        <Link to="/create-item" className="view-create-item">
           Create Item
         </Link>
       </div>
