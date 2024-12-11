@@ -1,11 +1,11 @@
 /* ItemListings.css */
 
-
 .item-listings {
   padding: 2rem;
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 120px); /* Adjust based on the height of your header and footer */
+  margin-bottom: 4rem; /* Add extra blank space at the bottom */
 }
 
 /* Grid container */
