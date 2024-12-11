@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const CreateItem = ({ addItem }) => {
-  // State for form data
+const CreateItem = () => {
   const [formData, setFormData] = useState({
     itemName: '',
     amount: '',
@@ -11,7 +12,8 @@ const CreateItem = ({ addItem }) => {
   });
 
   const [previewImage, setPreviewImage] = useState(null); // For image preview
-  const navigate = useNavigate(); // Hook to navigate to another page
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   // Handle input change
   const handleChange = (e) => {
@@ -29,38 +31,43 @@ const CreateItem = ({ addItem }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Form validation
-    if (!formData.itemName || !formData.amount || !formData.image) {
+    if (!formData.itemName || !formData.amount || isNaN(formData.amount)) {
       alert('Please fill in all required fields.');
       return;
     }
 
-    // Create the new item object
-    const newItem = {
-      id: Date.now().toString(), // Generate a unique ID
-      title: formData.itemName,
-      description: formData.description,
-      price: parseFloat(formData.amount),
-      imageUrl: URL.createObjectURL(formData.image), // Temporary URL for preview
-    };
+    try {
+      const newItem = {
+        title: formData.itemName,
+        description: formData.description,
+        price: parseFloat(formData.amount),
+        imageUrl: previewImage, // Could Switch to aws if errors happen on diffrent machines
+        createdAt: serverTimestamp(),
+      };
 
-    // Add the item to the list using the passed function
-    addItem(newItem);
+      // Send the item to the FireStore DB
+      //DONT CHANGE
+      await addDoc(collection(db, 'items'), newItem);
 
-    // Reset the form
-    setFormData({
-      itemName: '',
-      amount: '',
-      description: '',
-      image: null,
-    });
-    setPreviewImage(null);
+      setMessage('Item created successfully!');
+      setFormData({
+        itemName: '',
+        amount: '',
+        description: '',
+        image: null,
+      });
+      setPreviewImage(null);
 
-    // Navigate to the Items page
-    navigate('/items');
+      // Navigate to the Items page
+      navigate('/items');
+    } catch (error) {
+      console.error('Error creating item:', error);
+      setMessage('Failed to create item. Please try again.');
+    }
   };
 
   return (
@@ -107,7 +114,7 @@ const CreateItem = ({ addItem }) => {
         {/* Image Upload */}
         <div>
           <label>Upload Image:</label>
-          <input type="file" accept="image/*" onChange={handleFileChange} required />
+          <input type="file" accept="image/*" onChange={handleFileChange} />
         </div>
 
         {/* Image Preview */}
@@ -120,6 +127,7 @@ const CreateItem = ({ addItem }) => {
 
         {/* Submit Button */}
         <button type="submit">Create Item</button>
+        {message && <p>{message}</p>}
       </form>
     </div>
   );
