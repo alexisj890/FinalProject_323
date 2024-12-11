@@ -29,27 +29,6 @@ function ItemListings() {
       price: 2499,
       imageUrl: 'https://via.placeholder.com/300?text=Gaming+Laptop',
     },
-    {
-      _id: '4',
-      title: 'Sony WH-1000XM5 Headphones',
-      description: 'Noise-cancelling wireless headphones with amazing sound quality.',
-      price: 399,
-      imageUrl: 'https://via.placeholder.com/300?text=Sony+Headphones',
-    },
-    {
-      _id: '5',
-      title: '2023 Honda Civic',
-      description: 'A brand-new Honda Civic with modern features, 0 miles, and an elegant blue finish.',
-      price: 24999,
-      imageUrl: 'https://via.placeholder.com/300?text=Honda+Civic',
-    },
-    {
-      _id: '6',
-      title: '2022 BMW 5 Series',
-      description: 'A luxury BMW 5 Series sedan with a powerful engine, leather interior, and advanced safety features.',
-      price: 56999,
-      imageUrl: 'https://via.placeholder.com/300?text=BMW+5+Series',
-    },
   ];
 
   useEffect(() => {

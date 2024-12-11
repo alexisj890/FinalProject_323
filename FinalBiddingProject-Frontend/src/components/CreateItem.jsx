@@ -13,7 +13,7 @@ function CreateItem() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/items', {
+      await axios.post('http://localhost:5000/CreateItem', {
         title,
         description,
         price,

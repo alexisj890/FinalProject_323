@@ -18,6 +18,7 @@ import TransactionRating from './components/TransactionRating';
 import Sidebar from './components/Sidebar';
 import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
+import CreateItem from './components/CreateItem';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
