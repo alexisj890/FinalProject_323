@@ -100,6 +100,9 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
             <li>
               <Link to="/deposit" onClick={toggleSidebar}>Deposit</Link>
             </li>
+            <li>
+              <Link to="/LiveBid" onClick={toggleSidebar}>Live Bidding</Link>
+            </li>
           </ul>
         </div>
       )}

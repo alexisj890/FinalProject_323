@@ -18,6 +18,7 @@ function Sidebar({ isOpen, toggleSidebar, currentUser }) {
             <li>
               <Link to="/profile" onClick={toggleSidebar}>Profile</Link>
             </li>
+  
             <li>
               <Link to="/verification-question" onClick={toggleSidebar}>Verification Question</Link>
             </li>
