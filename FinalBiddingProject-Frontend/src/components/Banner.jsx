@@ -18,9 +18,7 @@ function Banner() {
         <button onClick={handleScroll}>Get Started</button>
       </section>
       <section ref={targetSectionRef} className="target-section">
-        <h2>Target Section</h2>
-        <p>This is the section you are scrolled to after clicking the button.</p>
-      </section>
+        </section>
     </div>
   );
 }
