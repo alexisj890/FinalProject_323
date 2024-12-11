@@ -54,7 +54,7 @@ function Comments() {
             </div>
           ))
         ) : !isFetching && comments.length === 0 ? (
-          <p className="no-comments">No comments yet. Be the first to comment!</p>
+          <p className="no-comments"> Be the first to comment!</p>
         ) : (
           <p className="loading-message">Loading comments...</p>
         )}
