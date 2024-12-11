@@ -8,8 +8,8 @@ function Deposit() {
 
   const handleDeposit = async (e) => {
     e.preventDefault();
-    if (!amount || isNaN(amount) || amount <= 0) {
-      setMessage('Please enter a valid amount.');
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      setMessage('Please enter a valid amount greater than 0.');
       return;
     }
 
@@ -18,18 +18,30 @@ function Deposit() {
       const userDoc = await getDoc(userRef);
 
       if (userDoc.exists()) {
-        const currentBalance = userDoc.data().balance || 0; // Default to 0 if no balance exists
+        const userData = userDoc.data();
+        const currentBalance = userData.balance || 0; // Default to 0 if no balance exists
         const newBalance = currentBalance + parseFloat(amount);
 
-        await updateDoc(userRef, { balance: newBalance });
-        setMessage(`Successfully deposited $${amount}. New balance: $${newBalance.toFixed(2)}`);
+        const updates = { balance: newBalance };
+        if (newBalance >= 5000 && userData.role !== 'super_user') {
+          updates.role = 'super_user';
+          setMessage(
+            `Congratulations! You've been promoted to Super User with a new balance of $${newBalance.toFixed(2)}.`
+          );
+        } else {
+          setMessage(
+            `Successfully deposited $${amount}. New balance: $${newBalance.toFixed(2)}`
+          );
+        }
+
+        await updateDoc(userRef, updates);
         setAmount('');
       } else {
-        setMessage('User document does not exist.');
+        setMessage('User document does not exist. Please contact support.');
       }
     } catch (error) {
       console.error('Error depositing money:', error);
-      setMessage('An error occurred. Please try again.');
+      setMessage('An error occurred while processing your deposit. Please try again.');
     }
   };
 
@@ -37,18 +49,46 @@ function Deposit() {
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>Deposit</h1>
       <form onSubmit={handleDeposit}>
-        <div>
-          <label>Amount: </label>
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ marginRight: '0.5rem' }}>Amount:</label>
           <input
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            placeholder="Enter amount"
+            style={{
+              padding: '0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              width: '200px',
+            }}
             required
           />
         </div>
-        <button type="submit">Deposit</button>
+        <button
+          type="submit"
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Deposit
+        </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && (
+        <p
+          style={{
+            marginTop: '1rem',
+            color: message.includes('Congratulations') ? 'green' : 'red',
+          }}
+        >
+          {message}
+        </p>
+      )}
     </div>
   );
 }
