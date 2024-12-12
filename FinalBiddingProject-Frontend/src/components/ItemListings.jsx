@@ -10,16 +10,22 @@ function ItemListings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Fetch items from Firestore
+  // Fetch all items and then filter client-side
   useEffect(() => {
+    const itemsRef = collection(db, 'items');
+
     const unsubscribe = onSnapshot(
-      collection(db, 'items'),
+      itemsRef,
       (snapshot) => {
         const fetchedItems = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setItems(fetchedItems);
+
+        // Filter items to only show those that are NOT live bids.
+        // This includes items that have `isLiveBid: false` or no `isLiveBid` field at all.
+        const nonLiveItems = fetchedItems.filter(item => item.isLiveBid !== true);
+        setItems(nonLiveItems);
         setLoading(false);
       },
       (error) => {

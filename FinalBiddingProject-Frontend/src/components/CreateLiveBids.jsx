@@ -52,9 +52,10 @@ const CreateLiveBids = ({ currentUser }) => {
         curPrice: parseFloat(formData.startPrice),
         imageUrl: formData.imageUrl,
         owner: currentUser.email,
-        ownerRole: currentUser.role,
+        ownerRole: currentUser.role ? currentUser.role.toUpperCase() : 'VIP', // ensure consistent casing
         endTime: endTime.toISOString(), // Store as ISO string
         createdAt: serverTimestamp(),
+        isLiveBid: true // This field distinguishes live bidding items
       };
 
       // Add the bid item to the "items" collection in Firebase

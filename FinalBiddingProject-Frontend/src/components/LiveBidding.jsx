@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from './Icons'; // Import the specific icon from your utility
 import BiddingRoom from './BiddingRoom';
 import RockPaperScissors from './RockPaperScissors';
 
 const LiveBidding = ({ currentUser }) => {
   const [vipItems, setVipItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tieBidders, setTieBidders] = useState(null); // To store tied bidders
+  const [tieBidders, setTieBidders] = useState(null);
+  const [isSimulating, setIsSimulating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,13 +22,14 @@ const LiveBidding = ({ currentUser }) => {
     }
 
     if (!currentUser.role || currentUser.role.toLowerCase() !== 'vip') {
-      alert('Access restricted to VIP members.');
+      alert('Access restricted: Only VIP members can access Live Bidding.');
       navigate('/');
       return;
     }
 
     const itemsRef = collection(db, 'items');
-    const q = query(itemsRef, where('ownerRole', '==', 'VIP'));
+    // Query only items that are live bid items
+    const q = query(itemsRef, where('isLiveBid', '==', true));
 
     const unsubscribe = onSnapshot(
       q,
@@ -52,10 +56,13 @@ const LiveBidding = ({ currentUser }) => {
     setTieBidders(null);
   };
 
-  // Temporary button to manually activate the tie-breaking game
   const simulateTie = () => {
-    const mockBidders = ['User1', 'User2'];
-    setTieBidders(mockBidders);
+    setIsSimulating(true);
+    setTimeout(() => {
+      const mockBidders = ['User1', 'User2'];
+      setTieBidders(mockBidders);
+      setIsSimulating(false);
+    }, 1000);
   };
 
   if (loading) {
@@ -65,8 +72,9 @@ const LiveBidding = ({ currentUser }) => {
   return (
     <div className="live-bidding" style={{ padding: '1rem' }}>
       <h2>Live Bidding Session</h2>
-      <p>Only VIPs can participate in bidding on items listed by other VIPs.</p>
-      
+      <p>Only VIPs can participate in bidding on these exclusive live bidding items.</p>
+
+      {/* Button to create a new live bid */}
       <button
         onClick={() => navigate('/CreateLiveBids')}
         style={{
@@ -79,30 +87,29 @@ const LiveBidding = ({ currentUser }) => {
           cursor: 'pointer',
         }}
       >
-        Create Live Bid
+        <FontAwesomeIcon icon={faPlus} /> Create Live Bid
       </button>
 
-      {/* Temporary test button to simulate a tie */}
+      {/* Button to simulate a tie */}
       <button
         onClick={simulateTie}
+        disabled={isSimulating}
         style={{
           marginBottom: '1rem',
           padding: '0.5rem 1rem',
-          backgroundColor: '#ff4500',
+          backgroundColor: isSimulating ? '#ccc' : '#ff4500',
           color: '#fff',
           border: 'none',
           borderRadius: '5px',
-          cursor: 'pointer',
+          cursor: isSimulating ? 'not-allowed' : 'pointer',
         }}
       >
-        Simulate Tie
+        {isSimulating ? 'Simulating...' : 'Simulate Tie'}
       </button>
 
+      {/* Tie-breaking game */}
       {tieBidders ? (
-        <RockPaperScissors
-          players={tieBidders}
-          onGameEnd={handleGameEnd}
-        />
+        <RockPaperScissors players={tieBidders} onGameEnd={handleGameEnd} />
       ) : vipItems.length > 0 ? (
         <BiddingRoom
           items={vipItems}
@@ -110,7 +117,7 @@ const LiveBidding = ({ currentUser }) => {
           onTieBreak={handleTieBreak}
         />
       ) : (
-        <p>No VIP items available for bidding at the moment.</p>
+        <p>No items available for live bidding at the moment.</p>
       )}
     </div>
   );
