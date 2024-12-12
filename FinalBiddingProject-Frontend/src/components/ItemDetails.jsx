@@ -25,25 +25,50 @@ function ItemDetails({ currentUser }) {
           setItem({ id: itemSnap.id, ...itemSnap.data() });
         } else {
           console.error('No such item found!');
+          setError('Item not found.');
         }
       } catch (error) {
         console.error('Error fetching item:', error);
+        setError('Failed to load item details.');
       }
     };
 
     fetchItem();
   }, [id]);
 
+  // Helper function to re-fetch item data after updates
+  const refetchItem = async () => {
+    const itemRef = doc(db, 'items', id);
+    const itemSnap = await getDoc(itemRef);
+    if (itemSnap.exists()) {
+      setItem({ id: itemSnap.id, ...itemSnap.data() });
+      console.log('Item data re-fetched successfully:', itemSnap.data());
+    }
+  };
+
   // Handle placing a bid
   const handlePlaceBid = async (e) => {
     e.preventDefault();
+
+    // Ensure the user is logged in
+    if (!currentUser) {
+      setError('You must be logged in to place a bid.');
+      return;
+    }
+
+    if (!currentUser.uid) {
+      setError('User ID is missing from your account data. Please re-login.');
+      return;
+    }
 
     if (!bidAmount || isNaN(bidAmount)) {
       setError('Please enter a valid bid amount.');
       return;
     }
 
-    if (item.curPrice && parseFloat(bidAmount) <= item.curPrice) {
+    const parsedBid = parseFloat(bidAmount);
+
+    if (item.curPrice && parsedBid <= item.curPrice) {
       setError('Bid amount must be higher than the current price.');
       return;
     }
@@ -51,16 +76,15 @@ function ItemDetails({ currentUser }) {
     try {
       const itemRef = doc(db, 'items', id);
       await updateDoc(itemRef, {
-        curPrice: parseFloat(bidAmount),
-        curWinner: currentUser?.email || 'Guest',
-        buyerId: currentUser?.uid || null,
+        curPrice: parsedBid,
+        curWinner: currentUser.email || 'Guest',
+        buyerId: currentUser.uid,
       });
-      setItem((prevItem) => ({
-        ...prevItem,
-        curPrice: parseFloat(bidAmount),
-        curWinner: currentUser?.email || 'Guest',
-        buyerId: currentUser?.uid || null,
-      }));
+      console.log('Bid placed successfully by user:', currentUser.uid);
+
+      // Re-fetch item to ensure local state is up-to-date
+      await refetchItem();
+
       setBidAmount('');
       setBidSuccess(true);
       setTimeout(() => setBidSuccess(false), 3000); // Reset success message
@@ -135,12 +159,10 @@ function ItemDetails({ currentUser }) {
       setTimeout(() => setBuySuccess(false), 3000); // Reset success message
 
       alert('Congratulations! You bought the item.');
-      setItem((prevItem) => ({
-        ...prevItem,
-        sold: true,
-        curWinner: currentUser.email,
-        buyerId: currentUser.uid,
-      }));
+      console.log('Item purchased successfully.');
+
+      // Re-fetch updated item data
+      await refetchItem();
     } catch (error) {
       console.error('Error processing Buy Now:', error);
       alert('Failed to complete purchase. Please try again.');
@@ -154,18 +176,26 @@ function ItemDetails({ currentUser }) {
       return;
     }
 
+    // Ensure the bidder exists
+    if (!item.buyerId) {
+      setError('Bidder information is missing.');
+      console.error('Error: item.buyerId is not set. Current item data:', item);
+      return;
+    }
+
+    console.log('Attempting to accept bid. Item data:', item);
+    console.log('Accepting bid from buyerId:', item.buyerId);
+
     try {
       // Fetch owner and bidder user data
       const ownerRef = doc(db, 'users', currentUser.uid);
-      const bidderRef = doc(db, 'users', item.buyerId); // `buyerId` is curWinner's UID.
+      const bidderRef = doc(db, 'users', item.buyerId); // `buyerId` is the curWinner's UID.
 
-      const [ownerSnap, bidderSnap] = await Promise.all([
-        getDoc(ownerRef),
-        getDoc(bidderRef),
-      ]);
+      const [ownerSnap, bidderSnap] = await Promise.all([getDoc(ownerRef), getDoc(bidderRef)]);
 
       if (!ownerSnap.exists() || !bidderSnap.exists()) {
         setError('Unable to find owner or bidder data.');
+        console.error('Owner or bidder doc does not exist in users collection.');
         return;
       }
 
@@ -181,10 +211,11 @@ function ItemDetails({ currentUser }) {
         return;
       }
 
-      // Update balances and mark item as sold
+      // Update balances
       const newOwnerBalance = ownerBalance + item.curPrice;
       const newBidderBalance = bidderBalance - item.curPrice;
 
+      // Perform updates in Firestore
       await Promise.all([
         updateDoc(ownerRef, { balance: newOwnerBalance }),
         updateDoc(bidderRef, { balance: newBidderBalance }),
@@ -197,13 +228,12 @@ function ItemDetails({ currentUser }) {
       setAcceptSuccess(true);
       setError('');
       setTimeout(() => setAcceptSuccess(false), 3000); // Reset success message
-      setItem((prevItem) => ({
-        ...prevItem,
-        sold: true,
-        acceptedBid: item.curPrice,
-      }));
 
       alert('Bid accepted successfully!');
+      console.log('Bid accepted successfully.');
+
+      // Re-fetch updated item data
+      await refetchItem();
     } catch (error) {
       console.error('Error accepting bid:', error);
       setError('Failed to accept bid. Please try again.');
@@ -221,6 +251,7 @@ function ItemDetails({ currentUser }) {
       const itemRef = doc(db, 'items', id);
       await deleteDoc(itemRef);
       alert('Item deleted successfully.');
+      console.log('Item deleted successfully.');
       window.location.href = '/items'; // Redirect to items list
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -258,19 +289,23 @@ function ItemDetails({ currentUser }) {
           {/* Bid and Buy Actions */}
           {!isOwner && !item.sold && (
             <div className="actions">
-              <form onSubmit={handlePlaceBid} className="bid-form">
-                <input
-                  type="number"
-                  placeholder="Enter your bid"
-                  value={bidAmount}
-                  onChange={(e) => setBidAmount(e.target.value)}
-                  className="bid-input"
-                  required
-                />
-                <button type="submit" className="bid-button">
-                  Place Bid
-                </button>
-              </form>
+              {currentUser ? (
+                <form onSubmit={handlePlaceBid} className="bid-form">
+                  <input
+                    type="number"
+                    placeholder="Enter your bid"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    className="bid-input"
+                    required
+                  />
+                  <button type="submit" className="bid-button">
+                    Place Bid
+                  </button>
+                </form>
+              ) : (
+                <p>You must be logged in to place a bid.</p>
+              )}
               <button onClick={handleBuyNow} className="buy-now-button">
                 Buy Now
               </button>
