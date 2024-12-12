@@ -112,25 +112,20 @@ function VerificationQuestion({ currentUser }) {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
-  const [isUser, setIsUser] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-
-
-  
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * questions.length);
     setCurrentQuestion(questions[randomIndex]);
   }, []);
 
-  
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-      return () => clearInterval(timer); 
+      return () => clearInterval(timer);
     } else if (timeLeft === 0) {
       setCooldown(false);
     }
@@ -139,18 +134,21 @@ function VerificationQuestion({ currentUser }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (answer.toUpperCase() === currentQuestion.correctAnswer) {
-      setFeedback('Correct! You are now verified as a User.');
+      setFeedback('Correct! Your request to become a User is now pending review by 322Bidding (Super User).');
       try {
         const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, { role: 'user' });
-        setIsUser(true); 
+        await updateDoc(userRef, { 
+          roleRequestStatus: 'pending',
+          requestedRole: 'user'
+        });
       } catch (error) {
-        console.error('Error updating user role:', error);
+        console.error('Error updating user request:', error);
+        setFeedback('Error submitting your request. Please try again later.');
       }
     } else {
       setFeedback('Incorrect answer. Please try again in 5 minutes.');
       setCooldown(true);
-      setTimeLeft(5 * 60); 
+      setTimeLeft(5 * 60);
     }
   };
 
@@ -159,7 +157,7 @@ function VerificationQuestion({ currentUser }) {
   }
 
   if (!currentQuestion) return <p>Loading...</p>;
-  //Cooldown needs to be fixed so that reload does not disrupt it.
+
   return (
     <section id="verification-question">
       <h2>Human Verification Question</h2>
@@ -179,15 +177,14 @@ function VerificationQuestion({ currentUser }) {
             </label>
           </div>
         ))}
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={cooldown}>Submit</button>
       </form>
-       {cooldown && (
+      {cooldown && (
         <p className="cooldown-timer">
           You can try again in {Math.floor(timeLeft / 60)}:{`0${timeLeft % 60}`.slice(-2)} minutes.
         </p>
       )}
       {feedback && <p>{feedback}</p>}
-      {isUser && <p className="user-tag">Status: User</p>}
     </section>
   );
 }

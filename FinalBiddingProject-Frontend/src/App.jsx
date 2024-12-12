@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from './firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore'; // Note: Use setDoc if doc doesn't exist
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -27,6 +27,8 @@ import ComplaintForm from './components/ComplaintForm';
 import CreateLiveBids from './components/CreateLiveBids';
 import { updateUserRoleStatus } from './utils/updateUserRoleStatus';
 
+import SuperUserDashboard from './components/SuperUserDashboard'; // Un-commented
+
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
@@ -45,11 +47,17 @@ function App() {
       let userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
-        // If no user data, set them as visitor
-        await updateDoc(userRef, { role: 'visitor' });
+        // If no user data, create it and set them as visitor
+        await setDoc(userRef, { 
+          role: 'visitor',
+          balance: 0,
+          transactionCount: 0,
+          complaintCount: 0,
+        });
         userDoc = await getDoc(userRef);
       }
 
+      // Update currentUser state
       setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
 
       // Ensure role status is up-to-date
@@ -160,6 +168,16 @@ function App() {
           <Route
             path="/items/:id/complain"
             element={currentUser ? <ComplaintForm currentUser={currentUser} /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/superuser-dashboard"
+            element={
+              currentUser?.username === '322Bidding' ? (
+                <SuperUserDashboard currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
           />
           <Route
             path="*"

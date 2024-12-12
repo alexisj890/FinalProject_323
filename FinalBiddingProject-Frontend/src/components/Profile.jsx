@@ -99,12 +99,19 @@ function Profile() {
     return <p>Loading...</p>;
   }
 
-  const roleDisplay =
-    userData.role === 'vip'
-      ? 'VIP'
-      : userData.role === 'user'
-      ? 'Verified User'
-      : 'Visitor';
+  // Determine the displayed role based on answeredQuestion and approvedBySuperUser
+  let roleDisplay;
+  if (userData.answeredQuestion && !userData.approvedBySuperUser) {
+    roleDisplay = 'Pending (Awaiting Approval)';
+  } else {
+    // If user is approved, fallback to the user's actual role
+    roleDisplay =
+      userData.role === 'vip'
+        ? 'VIP'
+        : userData.role === 'user'
+        ? 'Verified User'
+        : 'Visitor';
+  }
 
   const renderItemsAsCards = (itemsArray) => {
     if (itemsArray.length === 0) return <p>No items available.</p>;
@@ -140,6 +147,13 @@ function Profile() {
       <p><strong>Email:</strong> {auth.currentUser.email}</p>
       <p><strong>Current Role:</strong> {roleDisplay}</p>
       <p><strong>Current Balance:</strong> ${userData.balance?.toFixed(2) || '0.00'}</p>
+
+      {/* If the user is the super user */}
+      {userData.username === '322Bidding' && (
+        <p style={{ color: 'green', fontWeight: 'bold', margin: '1rem 0' }}>
+          You are a Super User! <Link to="/superuser-dashboard">Go to Super User Dashboard</Link>
+        </p>
+      )}
 
       {averageRating !== null ? (
         <div style={{ marginTop: '1.5rem' }}>
