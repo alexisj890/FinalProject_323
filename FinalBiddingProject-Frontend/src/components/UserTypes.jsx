@@ -5,11 +5,12 @@ function UserTypes({ currentUser }) {
   const navigate = useNavigate();
 
   const handleQuestionClick = () => {
-    console.log('Current User in UserTypes:', currentUser); // Debugging log
     if (!currentUser) {
       alert('You must be logged in to see the question.');
+    } else if (currentUser.role === 'user' || currentUser.role === 'VIP') {
+      alert('You are already verified. You cannot access the verification question.');
     } else {
-      navigate('/verification-question'); // Navigate to verification question if logged in
+      navigate('/verification-question'); // Navigate to verification question if logged in and role is not 'user' or 'VIP'
     }
   };
 
@@ -21,7 +22,9 @@ function UserTypes({ currentUser }) {
         <p>
           Browse listings and provide comments. Apply to become a User by answering a human verification question.
         </p>
-        <button onClick={handleQuestionClick}>Question</button>
+        {(!currentUser || (currentUser && currentUser.role !== 'user' && currentUser.role !== 'VIP')) && (
+          <button onClick={handleQuestionClick}>Question</button>
+        )}
       </div>
       <div className="user-type">
         <h3>Users</h3>
