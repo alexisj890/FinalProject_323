@@ -19,10 +19,12 @@ import Sidebar from './components/Sidebar';
 import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
 import CreateItem from './components/CreateItem';
+import LiveBidding from './components/LiveBidding'; // Import Live Bidding
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   // State for newly created items
@@ -53,14 +55,21 @@ function App() {
   const openRegistrationModal = () => setIsRegistrationOpen(true);
   const closeRegistrationModal = () => setIsRegistrationOpen(false);
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   return (
     <Router>
       <div className="App">
         <Header
           onLoginClick={openLoginModal}
           onRegisterClick={openRegistrationModal}
+          toggleSidebar={toggleSidebar}
           currentUser={currentUser}
-          setCurrentUser={setCurrentUser}
+        />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          currentUser={currentUser}
         />
         <Routes>
           <Route
@@ -97,6 +106,7 @@ function App() {
           <Route path="/Ratings" element={<TransactionRating />} />
           <Route path="/deposit" element={<Deposit />} />
           <Route path="/withdraw" element={<Withdraw />} />
+          <Route path="/live-bidding" element={<LiveBidding currentUser={currentUser} />} />
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}

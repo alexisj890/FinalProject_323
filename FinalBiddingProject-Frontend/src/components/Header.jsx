@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
@@ -6,10 +6,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import './Header.css';
 
 function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) {
-  const [username, setUsername] = React.useState('');
+  const [username, setUsername] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentUser) {
       const fetchUsername = async () => {
         try {
@@ -87,25 +87,23 @@ function Header({ onLoginClick, onRegisterClick, currentUser, setCurrentUser }) 
         </ul>
       </header>
 
-      {sidebarOpen && (
-        <div className="sidebar">
-          <button className="close-sidebar" onClick={toggleSidebar}>&times;</button>
-          <ul className="sidebar-links">
-            <li>
-              <Link to="/profile" onClick={toggleSidebar}>Profile</Link>
-            </li>
-            <li>
-              <Link to="/withdraw" onClick={toggleSidebar}>Withdraw</Link>
-            </li>
-            <li>
-              <Link to="/deposit" onClick={toggleSidebar}>Deposit</Link>
-            </li>
-            <li>
-              <Link to="/LiveBid" onClick={toggleSidebar}>Live Bidding</Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <button className="close-sidebar" onClick={toggleSidebar}>&times;</button>
+        <ul className="sidebar-links">
+          <li>
+            <Link to="/profile" onClick={toggleSidebar}>Profile</Link>
+          </li>
+          <li>
+            <Link to="/withdraw" onClick={toggleSidebar}>Withdraw</Link>
+          </li>
+          <li>
+            <Link to="/deposit" onClick={toggleSidebar}>Deposit</Link>
+          </li>
+          <li>
+            <Link to="/LiveBidding" onClick={toggleSidebar}>Live Bidding</Link>
+          </li>
+        </ul>
+      </div>
     </>
   );
 }

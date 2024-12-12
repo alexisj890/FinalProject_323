@@ -18,9 +18,15 @@ function Sidebar({ isOpen, toggleSidebar, currentUser }) {
             <li>
               <Link to="/profile" onClick={toggleSidebar}>Profile</Link>
             </li>
-  
             <li>
-              <Link to="/verification-question" onClick={toggleSidebar}>Verification Question</Link>
+              <Link to="/withdraw" onClick={toggleSidebar}>Withdraw</Link>
+            </li>
+            <li>
+              <Link to="/deposit" onClick={toggleSidebar}>Deposit</Link>
+            </li>
+            <li>
+            <Link to="/live-bidding" onClick={toggleSidebar}>Live Bidding</Link>
+
             </li>
           </>
         ) : (
