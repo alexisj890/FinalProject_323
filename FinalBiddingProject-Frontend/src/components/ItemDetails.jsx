@@ -111,7 +111,9 @@ function ItemDetails({ currentUser }) {
       const buyerData = buyerSnap.data();
       const sellerData = sellerSnap.data();
 
-      const price = item.curPrice || item.price || item.startPrice || 0;
+      // **Updated Line: Use seller-set price instead of current bid**
+      const price = item.price || item.startPrice || 0;
+
       const buyerBalance = buyerData.balance || 0;
       const sellerBalance = sellerData.balance || 0;
 
@@ -266,7 +268,7 @@ function ItemDetails({ currentUser }) {
               ) : (
                 <p>You must be logged in to place a bid.</p>
               )}
-              <button onClick={handleBuyNow} className="buy-now-button">Buy Now</button>
+              <button onClick={handleBuyNow} className="buy-now-button">Buy Now for ${item.price || item.startPrice}</button>
             </div>
           )}
 
