@@ -12,6 +12,7 @@ function ItemDetails({ currentUser }) {
   const [bidSuccess, setBidSuccess] = useState(false);
   const [error, setError] = useState('');
   const [buySuccess, setBuySuccess] = useState(false);
+  const [acceptSuccess, setAcceptSuccess] = useState(false);
 
   // Fetch the item details from Firebase
   useEffect(() => {
@@ -52,11 +53,13 @@ function ItemDetails({ currentUser }) {
       await updateDoc(itemRef, {
         curPrice: parseFloat(bidAmount),
         curWinner: currentUser?.email || 'Guest',
+        buyerId: currentUser?.uid || null,
       });
       setItem((prevItem) => ({
         ...prevItem,
         curPrice: parseFloat(bidAmount),
         curWinner: currentUser?.email || 'Guest',
+        buyerId: currentUser?.uid || null,
       }));
       setBidAmount('');
       setBidSuccess(true);
@@ -117,13 +120,14 @@ function ItemDetails({ currentUser }) {
       // Perform updates in Firestore
       await updateDoc(buyerRef, { balance: buyerNewBalance });
       await updateDoc(sellerRef, { balance: sellerNewBalance });
-      
+
       // Mark the item as sold
       const itemRef = doc(db, 'items', id);
       await updateDoc(itemRef, {
         sold: true,
         curWinner: currentUser.email,
-        buyerId: currentUser.uid
+        buyerId: currentUser.uid,
+        acceptedBid: price,
       });
 
       setBuySuccess(true);
@@ -135,11 +139,74 @@ function ItemDetails({ currentUser }) {
         ...prevItem,
         sold: true,
         curWinner: currentUser.email,
-        buyerId: currentUser.uid
+        buyerId: currentUser.uid,
       }));
     } catch (error) {
       console.error('Error processing Buy Now:', error);
       alert('Failed to complete purchase. Please try again.');
+    }
+  };
+
+  // Handle accepting a bid
+  const handleAcceptBid = async () => {
+    if (!item || !item.curPrice || !item.curWinner) {
+      setError('No valid bid to accept.');
+      return;
+    }
+
+    try {
+      // Fetch owner and bidder user data
+      const ownerRef = doc(db, 'users', currentUser.uid);
+      const bidderRef = doc(db, 'users', item.buyerId); // `buyerId` is curWinner's UID.
+
+      const [ownerSnap, bidderSnap] = await Promise.all([
+        getDoc(ownerRef),
+        getDoc(bidderRef),
+      ]);
+
+      if (!ownerSnap.exists() || !bidderSnap.exists()) {
+        setError('Unable to find owner or bidder data.');
+        return;
+      }
+
+      const ownerData = ownerSnap.data();
+      const bidderData = bidderSnap.data();
+
+      const ownerBalance = ownerData.balance || 0;
+      const bidderBalance = bidderData.balance || 0;
+
+      // Check if bidder has enough funds (safety check)
+      if (bidderBalance < item.curPrice) {
+        setError('The bidder does not have enough funds to complete this transaction.');
+        return;
+      }
+
+      // Update balances and mark item as sold
+      const newOwnerBalance = ownerBalance + item.curPrice;
+      const newBidderBalance = bidderBalance - item.curPrice;
+
+      await Promise.all([
+        updateDoc(ownerRef, { balance: newOwnerBalance }),
+        updateDoc(bidderRef, { balance: newBidderBalance }),
+        updateDoc(doc(db, 'items', id), {
+          sold: true,
+          acceptedBid: item.curPrice,
+        }),
+      ]);
+
+      setAcceptSuccess(true);
+      setError('');
+      setTimeout(() => setAcceptSuccess(false), 3000); // Reset success message
+      setItem((prevItem) => ({
+        ...prevItem,
+        sold: true,
+        acceptedBid: item.curPrice,
+      }));
+
+      alert('Bid accepted successfully!');
+    } catch (error) {
+      console.error('Error accepting bid:', error);
+      setError('Failed to accept bid. Please try again.');
     }
   };
 
@@ -212,18 +279,25 @@ function ItemDetails({ currentUser }) {
 
           {isOwner && !item.sold && (
             <div>
-              <p className="info-message">You are the owner of this item.</p>
+              {item.curPrice && item.curWinner ? (
+                <button onClick={handleAcceptBid} className="accept-bid-button">
+                  Accept Bid
+                </button>
+              ) : (
+                <p>No valid bid to accept yet.</p>
+              )}
               <button onClick={handleDeleteItem} className="delete-button">
                 Delete Item
               </button>
             </div>
           )}
 
-          {item.sold && <p className="info-message">This item has been sold.</p>}
+          {item.sold && <p className="info-message">This item has been sold for ${item.acceptedBid}.</p>}
 
           {error && <p className="error-message">{error}</p>}
           {bidSuccess && <p className="success-message">Your bid was placed successfully!</p>}
           {buySuccess && <p className="success-message">Item purchased successfully!</p>}
+          {acceptSuccess && <p className="success-message">Bid accepted successfully!</p>}
         </div>
       </div>
 
