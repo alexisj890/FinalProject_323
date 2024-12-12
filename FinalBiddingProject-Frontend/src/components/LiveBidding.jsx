@@ -10,7 +10,7 @@ const LiveBidding = ({ currentUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Restrict access for non-VIPs
+    // Restricting access for non-VIPs 
     if (!currentUser || currentUser.role !== 'VIP') {
       alert('Access restricted to VIP members.');
       navigate('/');

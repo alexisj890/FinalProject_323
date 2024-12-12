@@ -23,10 +23,10 @@ function Deposit() {
         const newBalance = currentBalance + parseFloat(amount);
 
         const updates = { balance: newBalance };
-        if (newBalance >= 5000 && userData.role !== 'super_user') {
-          updates.role = 'super_user';
+        if (newBalance >= 5000 && userData.role !== 'vip') {
+          updates.role = 'vip';
           setMessage(
-            `Congratulations! You've been promoted to Super User with a new balance of $${newBalance.toFixed(2)}.`
+            `Congratulations! You've been promoted to VIP with a new balance of $${newBalance.toFixed(2)}.`
           );
         } else {
           setMessage(

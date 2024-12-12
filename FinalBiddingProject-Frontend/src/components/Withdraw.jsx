@@ -30,12 +30,12 @@ function Withdraw() {
         const newBalance = currentBalance - withdrawalAmount;
         const updates = { balance: newBalance };
 
-        if (newBalance < 5000 && userData.role === 'super_user') {
+        if (newBalance < 5000 && userData.role === 'vip') {
           updates.role = 'user';
           setMessage(
             `Withdrawal successful! Your new balance is $${newBalance.toFixed(
               2
-            )}. You are no longer a Super User.`
+            )}. You are no longer a VIP`
           );
         } else {
           setMessage(

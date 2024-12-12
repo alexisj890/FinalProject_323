@@ -39,7 +39,7 @@ function Profile() {
       <h1>Profile</h1>
       <p><strong>Username:</strong> {userData.username}</p>
       <p><strong>Email:</strong> {auth.currentUser.email}</p>
-      <p><strong>Current Role:</strong> {userData.role === 'super_user' ? 'Super User' : userData.role === 'user' ? 'Verified User' : 'Visitor'}</p>
+      <p><strong>Current Role:</strong> {userData.role === 'vip' ? 'VIP' : userData.role === 'user' ? 'Verified User' : 'Visitor'}</p>
       <p><strong>Current Balance:</strong> ${userData.balance?.toFixed(2) || '0.00'}</p>
       <div style={{ marginTop: '1.5rem' }}>
         <h2>Previous Transactions</h2>
