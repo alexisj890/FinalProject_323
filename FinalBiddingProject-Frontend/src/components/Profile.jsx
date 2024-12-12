@@ -85,18 +85,12 @@ function Profile() {
     return <p>Loading...</p>;
   }
 
-<<<<<<< HEAD
-  let roleDisplay = 'Visitor';
-  if (userData.role === 'user') roleDisplay = 'Verified User';
-  if (userData.role === 'vip') roleDisplay = 'VIP';
-=======
   const roleDisplay =
     userData.role === 'vip'
       ? 'VIP'
       : userData.role === 'user'
       ? 'Verified User'
       : 'Visitor';
->>>>>>> ceec899d2631f5986145c3af05662fe312f09057
 
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', textAlign: 'center' }}>
