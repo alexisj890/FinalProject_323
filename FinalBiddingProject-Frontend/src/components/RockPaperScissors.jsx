@@ -8,7 +8,6 @@ const RockPaperScissors = ({ players, onGameEnd }) => {
 
   const options = ['rock', 'paper', 'scissors'];
 
-  // Logic for determining the winner of a round
   const determineWinner = (choice1, choice2) => {
     if (choice1 === choice2) return 'tie';
     if (
@@ -21,31 +20,39 @@ const RockPaperScissors = ({ players, onGameEnd }) => {
     return 'player2';
   };
 
-  // Handle player moves
   const handleChoice = (player, choice) => {
     setPlayerChoices((prev) => ({ ...prev, [player]: choice }));
 
+    // Once both players have chosen, determine the winner
     if (player === 'player2') {
       const winner = determineWinner(playerChoices.player1, choice);
 
-      if (winner === 'player1') {
-        setScores((prev) => ({ ...prev, player1: prev.player1 + 1 }));
-        setResult(`${players.player1} wins this round!`);
-      } else if (winner === 'player2') {
-        setScores((prev) => ({ ...prev, player2: prev.player2 + 1 }));
-        setResult(`${players.player2} wins this round!`);
-      } else {
-        setResult('It\'s a tie!');
-      }
+      setScores((prevScores) => {
+        let newScores = { ...prevScores };
 
-      setRound((prev) => prev + 1);
-      setPlayerChoices({ player1: null, player2: null });
+        if (winner === 'player1') {
+          newScores.player1 += 1;
+          setResult(`${players.player1} wins this round!`);
+        } else if (winner === 'player2') {
+          newScores.player2 += 1;
+          setResult(`${players.player2} wins this round!`);
+        } else {
+          setResult("It's a tie!");
+        }
 
-      // End the game if one player reaches 2 wins
-      if (scores.player1 === 1 || scores.player2 === 1) {
-        const finalWinner = scores.player1 > scores.player2 ? 'player1' : 'player2';
-        onGameEnd(finalWinner);
-      }
+        // Check if someone reached 2 wins
+        if (newScores.player1 === 2 || newScores.player2 === 2) {
+          const finalWinner =
+            newScores.player1 > newScores.player2 ? 'player1' : 'player2';
+          onGameEnd(finalWinner);
+        } else {
+          // Move to the next round if no one has won yet
+          setRound((prevRound) => prevRound + 1);
+          setPlayerChoices({ player1: null, player2: null });
+        }
+
+        return newScores;
+      });
     }
   };
 
@@ -54,14 +61,14 @@ const RockPaperScissors = ({ players, onGameEnd }) => {
       <h2>Rock-Paper-Scissors: Round {round}</h2>
       <p>{result}</p>
       <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-        {['player1', 'player2'].map((player) => (
-          <div key={player}>
-            <h3>{players[player]}</h3>
+        {['player1', 'player2'].map((playerKey) => (
+          <div key={playerKey}>
+            <h3>{players[playerKey]}</h3>
             {options.map((option) => (
               <button
                 key={option}
-                onClick={() => handleChoice(player, option)}
-                disabled={playerChoices[player] !== null}
+                onClick={() => handleChoice(playerKey, option)}
+                disabled={playerChoices[playerKey] !== null}
                 style={{ margin: '5px', padding: '10px' }}
               >
                 {option.charAt(0).toUpperCase() + option.slice(1)}
