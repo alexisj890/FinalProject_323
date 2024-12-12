@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { updateUserRoleStatus } from '../utils/updateUserRoleStatus';
 
 function Deposit() {
   const [amount, setAmount] = useState('');
@@ -27,22 +28,24 @@ function Deposit() {
           return;
         }
 
-        const currentBalance = userData.balance || 0; // Default to 0 if no balance is set
+        const currentBalance = userData.balance || 0;
         const newBalance = currentBalance + parseFloat(amount);
-
         const updates = { balance: newBalance };
-        if (newBalance >= 5000 && userData.role !== 'vip') {
-          updates.role = 'vip';
+
+        await updateDoc(userRef, updates);
+        await updateUserRoleStatus(auth.currentUser.uid);
+
+        // Re-check if user got upgraded to VIP
+        const updatedUser = await getDoc(userRef);
+        const updatedUserData = updatedUser.data();
+        if (updatedUserData.role === 'vip' && userData.role !== 'vip') {
           setMessage(
             `Congratulations! You've been promoted to VIP with a new balance of $${newBalance.toFixed(2)}.`
           );
         } else {
-          setMessage(
-            `Successfully deposited $${amount}. New balance: $${newBalance.toFixed(2)}`
-          );
+          setMessage(`Successfully deposited $${amount}. New balance: $${newBalance.toFixed(2)}`);
         }
 
-        await updateDoc(userRef, updates);
         setAmount('');
       } else {
         setMessage('User document does not exist. Please contact support.');

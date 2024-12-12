@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { updateUserRoleStatus } from '../utils/updateUserRoleStatus';
 
 function RateUser({ currentUser }) {
   const { id } = useParams(); 
@@ -10,7 +11,6 @@ function RateUser({ currentUser }) {
   const [rating, setRating] = useState(0);
   const [ratedUserId, setRatedUserId] = useState(null);
   const [error, setError] = useState('');
-
 
   const isRatingOwner = location.pathname.endsWith('rate-owner');
 
@@ -29,8 +29,6 @@ function RateUser({ currentUser }) {
         return;
       }
 
-      // If rating owner: currentUser must be buyer
-      // If rating buyer: currentUser must be owner
       if (isRatingOwner && currentUser.uid !== itemData.buyerId) {
         setError('You are not the buyer. Cannot rate owner.');
         return;
@@ -41,7 +39,6 @@ function RateUser({ currentUser }) {
         return;
       }
 
-      // Logic for user rating
       const userToRateId = isRatingOwner ? itemData.ownerId : itemData.buyerId;
       setRatedUserId(userToRateId);
     };
@@ -59,25 +56,21 @@ function RateUser({ currentUser }) {
 
     const userData = userSnap.data();
     const ratings = userData.ratings || [];
-    if (ratings.length < 3) return; // Suspension checks apply only after >= 3 ratings.
+    if (ratings.length < 3) return; // Suspension checks only after >= 3 ratings
 
     const avgRating = ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length;
 
     let suspended = false;
     let reason = '';
 
-    // Check conditions:
-    // If average < 2 => suspended for being too mean (or too low)
     if (avgRating < 2) {
       suspended = true;
       reason = 'low_ratings';
     } else if (avgRating > 4) {
-      // If average > 4 => suspended for being too generous
       suspended = true;
       reason = 'high_ratings';
     }
 
-    // Check if user has at least three ratings < 2 as well
     const lowRatingsCount = ratings.filter(r => r.value < 2).length;
     if (lowRatingsCount >= 3) {
       suspended = true;
@@ -85,11 +78,23 @@ function RateUser({ currentUser }) {
     }
 
     if (suspended) {
-      await updateDoc(userRef, {
-        suspended: true,
-        suspensionReason: reason
-      });
+      if (userData.role === 'vip') {
+        // VIP gets downgraded instead of suspended
+        await updateDoc(userRef, {
+          role: 'user',
+          suspended: false,
+          suspensionReason: ''
+        });
+      } else {
+        await updateDoc(userRef, {
+          suspended: true,
+          suspensionReason: reason
+        });
+      }
     }
+
+    // Re-check role after potential changes
+    await updateUserRoleStatus(userRef.id);
   };
 
   const handleSubmit = async (e) => {
@@ -106,7 +111,6 @@ function RateUser({ currentUser }) {
 
     try {
       const userRef = doc(db, 'users', ratedUserId);
-      // Add rating anonymously (no reference to currentUser)
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
         setError('User does not exist.');
@@ -120,7 +124,7 @@ function RateUser({ currentUser }) {
         ratings: updatedRatings
       });
 
-      // Update suspension status
+      // Update suspension status if needed
       await updateUserSuspensionStatus(userRef);
 
       alert("Thank you for your rating!");

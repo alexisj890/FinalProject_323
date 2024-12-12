@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import Comments from './Comments';
 import './ItemDetails.css';
+import { updateUserRoleStatus } from '../utils/updateUserRoleStatus';
 
 function ItemDetails({ currentUser }) {
   const { id } = useParams();
@@ -129,6 +130,17 @@ function ItemDetails({ currentUser }) {
     }
   };
 
+  const incrementTransactionCount = async (userId) => {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) return;
+    const userData = userSnap.data();
+    const newCount = (userData.transactionCount || 0) + 1;
+    await updateDoc(userRef, { transactionCount: newCount });
+    // Update role after transaction
+    await updateUserRoleStatus(userId);
+  };
+
   const handleBuyNow = async () => {
     if (!currentUser) {
       alert('You must be logged in to buy this item.');
@@ -156,7 +168,12 @@ function ItemDetails({ currentUser }) {
       const buyerData = buyerSnap.data();
       const sellerData = sellerSnap.data();
 
-      const price = item.price || item.startPrice || 0;
+      let price = item.price || item.startPrice || 0;
+
+      // If currentUser is VIP, apply 10% discount
+      if (buyerData.role === 'vip') {
+        price = price * 0.9; // Apply 10% discount
+      }
 
       const buyerBalance = buyerData.balance || 0;
       const sellerBalance = sellerData.balance || 0;
@@ -181,6 +198,10 @@ function ItemDetails({ currentUser }) {
         buyerId: currentUser.uid,
         acceptedBid: price,
       });
+
+      // Increment transaction count for both buyer and seller
+      await incrementTransactionCount(currentUser.uid);   // buyer
+      await incrementTransactionCount(item.ownerId);      // seller
 
       setBuySuccess(true);
       setError('');
@@ -220,16 +241,23 @@ function ItemDetails({ currentUser }) {
       const ownerData = ownerSnap.data();
       const bidderData = bidderSnap.data();
 
+      let finalPrice = item.curPrice;
+
+      // If bidder is VIP, apply 10% discount
+      if (bidderData.role === 'vip') {
+        finalPrice = finalPrice * 0.9;
+      }
+
       const ownerBalance = ownerData.balance || 0;
       const bidderBalance = bidderData.balance || 0;
 
-      if (bidderBalance < item.curPrice) {
+      if (bidderBalance < finalPrice) {
         setError('The bidder does not have enough funds to complete this transaction.');
         return;
       }
 
-      const newOwnerBalance = ownerBalance + item.curPrice;
-      const newBidderBalance = bidderBalance - item.curPrice;
+      const newOwnerBalance = ownerBalance + finalPrice;
+      const newBidderBalance = bidderBalance - finalPrice;
 
       // Update owner and bidder balances and mark item as sold
       await Promise.all([
@@ -237,9 +265,13 @@ function ItemDetails({ currentUser }) {
         updateDoc(bidderRef, { balance: newBidderBalance }),
         updateDoc(doc(db, 'items', id), {
           sold: true,
-          acceptedBid: item.curPrice,
+          acceptedBid: finalPrice,
         }),
       ]);
+
+      // Increment transaction count for both buyer and seller
+      await incrementTransactionCount(item.buyerId);    // buyer
+      await incrementTransactionCount(item.ownerId);    // seller
 
       setAcceptSuccess(true);
       setError('');
@@ -260,10 +292,6 @@ function ItemDetails({ currentUser }) {
       alert('You are not authorized to delete this item.');
       return;
     }
-
-    // Debugging Logs
-    console.log('Current User ID:', currentUser.uid);
-    console.log('Item Owner ID:', item.ownerId);
 
     const confirmDelete = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
     if (!confirmDelete) {

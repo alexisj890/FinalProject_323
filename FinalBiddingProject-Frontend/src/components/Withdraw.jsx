@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { updateUserRoleStatus } from '../utils/updateUserRoleStatus';
 
 function Withdraw() {
   const [amount, setAmount] = useState('');
@@ -36,20 +37,19 @@ function Withdraw() {
         }
 
         const newBalance = currentBalance - withdrawalAmount;
-        const updates = { balance: newBalance };
+        await updateDoc(userRef, { balance: newBalance });
+        await updateUserRoleStatus(auth.currentUser.uid);
 
-        if (newBalance < 5000 && userData.role === 'vip') {
-          updates.role = 'user';
+        const updatedUser = await getDoc(userRef);
+        const updatedUserData = updatedUser.data();
+        if (updatedUserData.role !== 'vip' && userData.role === 'vip') {
           setMessage(
             `Withdrawal successful! Your new balance is $${newBalance.toFixed(2)}. You are no longer a VIP.`
           );
         } else {
-          setMessage(
-            `Successfully withdrew $${amount}. New balance: $${newBalance.toFixed(2)}`
-          );
+          setMessage(`Successfully withdrew $${amount}. New balance: $${newBalance.toFixed(2)}`);
         }
 
-        await updateDoc(userRef, updates);
         setAmount('');
       } else {
         setMessage('User document does not exist. Please contact support.');

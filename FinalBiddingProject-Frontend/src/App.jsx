@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from './firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -25,6 +25,7 @@ import ItemDetails from './components/ItemDetails';
 import RateUser from './components/RateUser';
 import ComplaintForm from './components/ComplaintForm';
 import CreateLiveBids from './components/CreateLiveBids';
+import { updateUserRoleStatus } from './utils/updateUserRoleStatus';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -32,44 +33,45 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // State for newly created items
   const [newItems, setNewItems] = useState([]);
 
-  // Add new items to the state
   const addItem = (newItem) => {
     setNewItems((prevItems) => [...prevItems, newItem]);
   };
 
-  // Fetch user data from Firestore
   const fetchUserData = async (user) => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
-      } else {
-        console.error('No user data found in Firestore.');
-        setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+      const userRef = doc(db, 'users', user.uid);
+      let userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        // If no user data, set them as visitor
+        await updateDoc(userRef, { role: 'visitor' });
+        userDoc = await getDoc(userRef);
       }
+
+      setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
+
+      // Ensure role status is up-to-date
+      await updateUserRoleStatus(user.uid);
+      const refreshedDoc = await getDoc(userRef);
+      setCurrentUser({ uid: user.uid, email: user.email, ...refreshedDoc.data() });
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
-  // Firebase Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log('User is logged in:', user);
         await fetchUserData(user);
       } else {
-        console.log('No user logged in.');
         setCurrentUser(null);
       }
     });
     return () => unsubscribe();
   }, []);
 
-  // Modal Handlers
   const openLoginModal = () => setIsLoginOpen(true);
   const closeLoginModal = () => setIsLoginOpen(false);
   const openRegistrationModal = () => setIsRegistrationOpen(true);
@@ -92,7 +94,6 @@ function App() {
           currentUser={currentUser}
         />
         <Routes>
-          {/* Home Page */}
           <Route
             path="/"
             element={
@@ -103,26 +104,11 @@ function App() {
               </>
             }
           />
-          {/* Item Listings */}
           <Route path="/items" element={<ItemListings newItems={newItems} />} />
-          {/* Item Details */}
-          <Route
-            path="/items/:id"
-            element={<ItemDetails currentUser={currentUser} />}
-          />
-          {/* Create Item */}
-          <Route
-            path="/create-item"
-            element={<CreateItem addItem={addItem} currentUser={currentUser} />}
-          />
-          {/* Profile */}
-          <Route
-            path="/profile"
-            element={currentUser ? <Profile /> : <Navigate to="/" replace />}
-          />
-          {/* More Info */}
+          <Route path="/items/:id" element={<ItemDetails currentUser={currentUser} />} />
+          <Route path="/create-item" element={<CreateItem addItem={addItem} currentUser={currentUser} />} />
+          <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/" replace />} />
           <Route path="/more-info" element={<MoreInfo />} />
-          {/* Verification Question */}
           <Route
             path="/verification-question"
             element={
@@ -133,43 +119,36 @@ function App() {
               )
             }
           />
-          {/* Comments */}
           <Route path="/items/:id/comments" element={<Comments />} />
-          {/* Ratings */}
           <Route path="/Ratings" element={<TransactionRating />} />
-          {/* Deposit */}
           <Route
             path="/deposit"
             element={currentUser ? <Deposit /> : <Navigate to="/" replace />}
           />
-          {/* Withdraw */}
           <Route
             path="/withdraw"
             element={currentUser ? <Withdraw /> : <Navigate to="/" replace />}
           />
-          {/* Live Bidding */}
           <Route
             path="/LiveBidding"
             element={
-              currentUser?.role?.toLowerCase() === 'vip' ? (
+              currentUser?.role === 'vip' ? (
                 <LiveBidding currentUser={currentUser} />
               ) : (
                 <Navigate to="/" replace />
               )
             }
           />
-          {/* Create Live Bids */}
           <Route
             path="/CreateLiveBids"
             element={
-              currentUser?.role?.toLowerCase() === 'vip' ? (
+              currentUser?.role === 'vip' ? (
                 <CreateLiveBids currentUser={currentUser} />
               ) : (
                 <Navigate to="/" replace />
               )
             }
           />
-          {/* Rate User */}
           <Route
             path="/items/:id/rate-owner"
             element={currentUser ? <RateUser currentUser={currentUser} /> : <Navigate to="/" replace />}
@@ -178,12 +157,10 @@ function App() {
             path="/items/:id/rate-buyer"
             element={currentUser ? <RateUser currentUser={currentUser} /> : <Navigate to="/" replace />}
           />
-          {/* Complaint Form */}
           <Route
             path="/items/:id/complain"
             element={currentUser ? <ComplaintForm currentUser={currentUser} /> : <Navigate to="/" replace />}
           />
-          {/* 404 Page */}
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}

@@ -1,8 +1,8 @@
-// ComplaintForm.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, updateDoc } from 'firebase/firestore';
+import { updateUserRoleStatus } from '../utils/updateUserRoleStatus';
 
 function ComplaintForm({ currentUser }) {
   const { id } = useParams();
@@ -24,9 +24,6 @@ function ComplaintForm({ currentUser }) {
         setError('Transaction not completed. Cannot file complaint.');
         return;
       }
-      // Determine who to complain about:
-      // If currentUser is the buyer, they can complain about the seller.
-      // If currentUser is the seller, they can complain about the buyer.
       if (currentUser.uid === itemData.buyerId) {
         setComplainedUserId(itemData.ownerId);
       } else if (currentUser.uid === itemData.ownerId) {
@@ -53,6 +50,16 @@ function ComplaintForm({ currentUser }) {
         text: complaintText,
         timestamp: new Date(),
       });
+
+      // Increment complaintCount for complainedUserId
+      const complainedUserRef = doc(db, 'users', complainedUserId);
+      const complainedUserSnap = await getDoc(complainedUserRef);
+      if (complainedUserSnap.exists()) {
+        const complainedUserData = complainedUserSnap.data();
+        const newComplaintCount = (complainedUserData.complaintCount || 0) + 1;
+        await updateDoc(complainedUserRef, { complaintCount: newComplaintCount });
+        await updateUserRoleStatus(complainedUserId);
+      }
 
       alert('Complaint submitted successfully.');
       navigate('/items');
