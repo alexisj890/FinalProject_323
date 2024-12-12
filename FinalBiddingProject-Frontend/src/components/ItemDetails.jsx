@@ -70,20 +70,73 @@ function ItemDetails({ currentUser }) {
 
   // Handle "Buy Now" functionality
   const handleBuyNow = async () => {
-    if (item.ownerId === currentUser?.uid) {
+    if (!currentUser) {
+      alert('You must be logged in to buy this item.');
+      return;
+    }
+
+    if (item.ownerId === currentUser.uid) {
       alert('You cannot buy your own item.');
       return;
     }
 
+    if (item.sold) {
+      alert('This item is already sold.');
+      return;
+    }
+
     try {
+      // Fetch buyer and seller documents from Firestore
+      const buyerRef = doc(db, 'users', currentUser.uid);
+      const sellerRef = doc(db, 'users', item.ownerId);
+
+      const [buyerSnap, sellerSnap] = await Promise.all([getDoc(buyerRef), getDoc(sellerRef)]);
+
+      if (!buyerSnap.exists() || !sellerSnap.exists()) {
+        alert('Unable to find buyer or seller information.');
+        return;
+      }
+
+      const buyerData = buyerSnap.data();
+      const sellerData = sellerSnap.data();
+
+      const price = item.curPrice || item.price || item.startPrice || 0; // Ensure we have a price
+      const buyerBalance = buyerData.balance || 0;
+      const sellerBalance = sellerData.balance || 0;
+
+      // Check if buyer has enough funds
+      if (buyerBalance < price) {
+        setError('You do not have enough funds to buy this item.');
+        return;
+      }
+
+      // Update balances
+      const buyerNewBalance = buyerBalance - price;
+      const sellerNewBalance = sellerBalance + price;
+
+      // Perform updates in Firestore
+      await updateDoc(buyerRef, { balance: buyerNewBalance });
+      await updateDoc(sellerRef, { balance: sellerNewBalance });
+      
+      // Mark the item as sold
       const itemRef = doc(db, 'items', id);
       await updateDoc(itemRef, {
         sold: true,
-        curWinner: currentUser?.email || 'Guest',
+        curWinner: currentUser.email,
+        buyerId: currentUser.uid
       });
+
       setBuySuccess(true);
+      setError('');
       setTimeout(() => setBuySuccess(false), 3000); // Reset success message
+
       alert('Congratulations! You bought the item.');
+      setItem((prevItem) => ({
+        ...prevItem,
+        sold: true,
+        curWinner: currentUser.email,
+        buyerId: currentUser.uid
+      }));
     } catch (error) {
       console.error('Error processing Buy Now:', error);
       alert('Failed to complete purchase. Please try again.');
@@ -92,7 +145,7 @@ function ItemDetails({ currentUser }) {
 
   // Handle delete item functionality
   const handleDeleteItem = async () => {
-    if (item.ownerId !== currentUser?.uid) {
+    if (!item || item.ownerId !== currentUser?.uid) {
       alert('You are not authorized to delete this item.');
       return;
     }
@@ -113,6 +166,7 @@ function ItemDetails({ currentUser }) {
   }
 
   const isOwner = currentUser?.uid === item.ownerId;
+  const displayPrice = item.curPrice || item.price || item.startPrice;
 
   return (
     <div className="item-details-container">
@@ -124,7 +178,7 @@ function ItemDetails({ currentUser }) {
         <div className="item-details-info">
           <h1>{item.title}</h1>
           <p>{item.description}</p>
-          <h2>Price: ${item.curPrice || item.startPrice}</h2>
+          <h2>Price: ${displayPrice}</h2>
           <p>Seller: {item.ownerUsername || 'Unknown'}</p>
           <p>
             {item.curWinner ? (

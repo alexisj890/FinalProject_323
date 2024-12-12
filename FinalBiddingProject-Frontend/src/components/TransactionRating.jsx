@@ -1,32 +1,42 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./TransactionRating.css"; // Assuming you have a CSS file for styling
+import { useLocation, useNavigate } from "react-router-dom";
+import { db } from "../firebase";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import "./TransactionRating.css";
 
 function TransactionRating() {
   const [rating, setRating] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const sellerId = location.state?.sellerId; 
+  // Make sure you passed sellerId from the previous page. 
+  // For example: navigate("/transaction-rating", { state: { sellerId: "someSellerId"} });
 
   const handleRating = (value) => {
     setRating(value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
       alert("Please select a rating before submitting.");
       return;
     }
-    else{
+
+    try {
+      // Update the seller's document with the new rating.
+      const sellerRef = doc(db, "users", sellerId);
+      await updateDoc(sellerRef, {
+        ratings: arrayUnion(rating)
+      });
+
       alert("Thank you for your rating!");
+      navigate("/items"); 
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+      alert("Error submitting rating. Please try again.");
     }
-
-    const transactionData = {
-      rating
-    };
-
-    console.log("Transaction Rating Submitted:", transactionData);
-
-    navigate("/items");
   };
 
   return (
@@ -48,7 +58,7 @@ function TransactionRating() {
           </div>
         </div>
         <button type="submit" className="submit-button">
-          Rating
+          Submit Rating
         </button>
       </form>
     </div>

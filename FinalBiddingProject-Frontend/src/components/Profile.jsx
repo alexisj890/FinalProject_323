@@ -34,6 +34,12 @@ function Profile() {
     return <p>Loading...</p>;
   }
 
+  let averageRating = null;
+  if (userData.ratings && userData.ratings.length > 0) {
+    const sum = userData.ratings.reduce((acc, val) => acc + val, 0);
+    averageRating = (sum / userData.ratings.length).toFixed(2);
+  }
+
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>Profile</h1>
@@ -41,6 +47,19 @@ function Profile() {
       <p><strong>Email:</strong> {auth.currentUser.email}</p>
       <p><strong>Current Role:</strong> {userData.role === 'vip' ? 'VIP' : userData.role === 'user' ? 'Verified User' : 'Visitor'}</p>
       <p><strong>Current Balance:</strong> ${userData.balance?.toFixed(2) || '0.00'}</p>
+      
+      {averageRating !== null ? (
+        <div style={{ marginTop: '1.5rem' }}>
+          <h2>Average Rating</h2>
+          <p>{averageRating} / 5</p>
+        </div>
+      ) : (
+        <div style={{ marginTop: '1.5rem' }}>
+          <h2>Average Rating</h2>
+          <p>No ratings yet.</p>
+        </div>
+      )}
+
       <div style={{ marginTop: '1.5rem' }}>
         <h2>Previous Transactions</h2>
         {userData.transactions && userData.transactions.length > 0 ? (
@@ -55,6 +74,7 @@ function Profile() {
           <p>No transactions yet.</p>
         )}
       </div>
+
       <div style={{ marginTop: '1.5rem' }}>
         <h2>Cart</h2>
         <p>View your current cart and items you are bidding on.</p>

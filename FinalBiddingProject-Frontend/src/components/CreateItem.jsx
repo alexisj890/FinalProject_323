@@ -3,55 +3,68 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const CreateItem = () => {
+const CreateItem = ({ addItem, currentUser }) => {
   const [formData, setFormData] = useState({
     itemName: '',
     amount: '',
     description: '',
-    imageUrl: '', // Updated to store the image URL directly
+    imageUrl: '',
   });
 
-  const [previewImage, setPreviewImage] = useState(null); // For image preview
+  const [previewImage, setPreviewImage] = useState(null);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  // Handle input change
+  // If user is not logged in
+  if (!currentUser) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+        <p>You must be logged in to create an item.</p>
+        <button onClick={() => navigate('/login')}>Go to Login</button>
+      </div>
+    );
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file change for image upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file); // Temporarily use local URL
+      const imageUrl = URL.createObjectURL(file);
       setFormData((prev) => ({ ...prev, imageUrl }));
-      setPreviewImage(imageUrl); // Show a preview
+      setPreviewImage(imageUrl);
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Form validation
     if (!formData.itemName || !formData.amount || isNaN(formData.amount)) {
       alert('Please fill in all required fields.');
       return;
     }
 
     try {
+      const price = parseFloat(formData.amount);
       const newItem = {
         title: formData.itemName,
         description: formData.description,
-        price: parseFloat(formData.amount),
+        price,
         imageUrl: formData.imageUrl,
         createdAt: serverTimestamp(),
+        ownerId: currentUser.uid,
+        ownerEmail: currentUser.email,
+        sold: false,
       };
 
-      // Add the item to Firestore and get its ID
       const docRef = await addDoc(collection(db, 'items'), newItem);
+
+      if (typeof addItem === 'function') {
+        addItem({ id: docRef.id, ...newItem });
+      }
 
       setMessage('Item created successfully!');
       setFormData({
@@ -62,7 +75,6 @@ const CreateItem = () => {
       });
       setPreviewImage(null);
 
-      // Navigate to the new item's detail page
       navigate(`/items/${docRef.id}`);
     } catch (error) {
       console.error('Error creating item:', error);
@@ -75,7 +87,7 @@ const CreateItem = () => {
       <h2>Create New Item</h2>
       <form onSubmit={handleSubmit}>
         {/* Item Name */}
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Item Name:</label>
           <input
             type="text"
@@ -84,11 +96,12 @@ const CreateItem = () => {
             onChange={handleChange}
             required
             placeholder="Enter item name"
+            style={{ width: '100%', padding: '0.5rem' }}
           />
         </div>
 
         {/* Amount */}
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Amount ($):</label>
           <input
             type="number"
@@ -97,22 +110,24 @@ const CreateItem = () => {
             onChange={handleChange}
             required
             placeholder="Enter amount"
+            style={{ width: '100%', padding: '0.5rem' }}
           />
         </div>
 
         {/* Description */}
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Description:</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="Enter a description (optional)"
+            style={{ width: '100%', padding: '0.5rem', height: '100px' }}
           />
         </div>
 
         {/* Image Upload */}
-        <div>
+        <div style={{ marginBottom: '1rem' }}>
           <label>Upload Image:</label>
           <input type="file" accept="image/*" onChange={handleFileChange} />
         </div>
@@ -126,8 +141,20 @@ const CreateItem = () => {
         )}
 
         {/* Submit Button */}
-        <button type="submit">Create Item</button>
-        {message && <p>{message}</p>}
+        <button
+          type="submit"
+          style={{
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Create Item
+        </button>
+        {message && <p style={{ marginTop: '1rem', color: 'green' }}>{message}</p>}
       </form>
     </div>
   );
