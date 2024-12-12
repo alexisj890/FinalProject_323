@@ -64,7 +64,7 @@ function Profile() {
       {averageRating !== null ? (
         <div style={{ marginTop: '1.5rem' }}>
           <h2>Average Rating</h2>
-          <p>{averageRating} / 5</p>
+          <p>{averageRating} / 5.00</p>
         </div>
       ) : (
         <div style={{ marginTop: '1.5rem' }}>
