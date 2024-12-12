@@ -7,24 +7,28 @@ const BidItem = ({ item, currentUser }) => {
   const [highestBidder, setHighestBidder] = useState(item.curWinner || 'No bids yet');
   const [bidAmount, setBidAmount] = useState('');
   const [bidError, setBidError] = useState('');
-  const [timeLeft, setTimeLeft] = useState(300); // 5-minute countdown timer
+  const [timeLeft, setTimeLeft] = useState(0);
   const [isBiddingOver, setIsBiddingOver] = useState(false);
 
-  // Countdown timer logic
+  // Calculate time remaining based on endTime
   useEffect(() => {
+    const end = new Date(item.endTime).getTime(); // Convert ISO string to timestamp
+
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(timer);
-          setIsBiddingOver(true);
-          return 0;
-        }
-        return prevTime - 1;
-      });
+      const now = Date.now();
+      const diff = Math.floor((end - now) / 1000); // time in seconds
+
+      if (diff <= 0) {
+        clearInterval(timer);
+        setTimeLeft(0);
+        setIsBiddingOver(true);
+      } else {
+        setTimeLeft(diff);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [item.endTime]);
 
   // Real-time updates from Firestore
   useEffect(() => {
@@ -38,7 +42,7 @@ const BidItem = ({ item, currentUser }) => {
     });
 
     return () => unsubscribe();
-  }, [item.id]);
+  }, [item.id, item.startPrice]);
 
   const handleBid = async () => {
     if (!bidAmount || isNaN(bidAmount)) {
@@ -65,6 +69,12 @@ const BidItem = ({ item, currentUser }) => {
     }
   };
 
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}m ${s}s`;
+  };
+
   return (
     <div className="bid-item">
       <h3>{item.title}</h3>
@@ -81,7 +91,7 @@ const BidItem = ({ item, currentUser }) => {
         <strong>Highest Bidder:</strong> {highestBidder}
       </p>
       <p>
-        <strong>Time Left:</strong> {timeLeft > 0 ? `${timeLeft}s` : 'Bidding has ended'}
+        <strong>Time Left:</strong> {timeLeft > 0 ? formatTime(timeLeft) : 'Bidding has ended'}
       </p>
       {!isBiddingOver ? (
         <div className="bid-actions">

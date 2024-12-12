@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from './Icons'; // Import the specific icon from the utility
+import { faPlus } from './Icons'; // Import the specific icon from your utility
 import BiddingRoom from './BiddingRoom';
 import RockPaperScissors from './RockPaperScissors';
 
@@ -28,7 +28,8 @@ const LiveBidding = ({ currentUser }) => {
     }
 
     const itemsRef = collection(db, 'items');
-    const q = query(itemsRef, where('ownerRole', '==', 'VIP'));
+    // Query only items that are live bid items
+    const q = query(itemsRef, where('isLiveBid', '==', true));
 
     const unsubscribe = onSnapshot(
       q,
@@ -71,7 +72,7 @@ const LiveBidding = ({ currentUser }) => {
   return (
     <div className="live-bidding" style={{ padding: '1rem' }}>
       <h2>Live Bidding Session</h2>
-      <p>Only VIPs can participate in bidding on items listed by other VIPs.</p>
+      <p>Only VIPs can participate in bidding on these exclusive live bidding items.</p>
 
       {/* Button to create a new live bid */}
       <button
@@ -108,10 +109,7 @@ const LiveBidding = ({ currentUser }) => {
 
       {/* Tie-breaking game */}
       {tieBidders ? (
-        <RockPaperScissors
-          players={tieBidders}
-          onGameEnd={handleGameEnd}
-        />
+        <RockPaperScissors players={tieBidders} onGameEnd={handleGameEnd} />
       ) : vipItems.length > 0 ? (
         <BiddingRoom
           items={vipItems}
@@ -119,7 +117,7 @@ const LiveBidding = ({ currentUser }) => {
           onTieBreak={handleTieBreak}
         />
       ) : (
-        <p>No VIP items available for bidding at the moment.</p>
+        <p>No items available for live bidding at the moment.</p>
       )}
     </div>
   );
