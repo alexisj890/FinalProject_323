@@ -1,0 +1,67 @@
+.item-details-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+  }
+  
+  .item-details-main {
+    display: flex;
+    gap: 20px;
+    width: 80%;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .item-details-image {
+    max-width: 300px;
+    border-radius: 8px;
+  }
+  
+  .item-details-info {
+    flex: 1;
+  }
+  
+  .actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .bid-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .bid-button,
+  .buy-now-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .bid-button {
+    background-color: #007bff;
+  }
+  
+  .buy-now-button {
+    background-color: #28a745;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .success-message {
+    color: green;
+    margin-top: 10px;
+  }
+  

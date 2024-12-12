@@ -8,7 +8,7 @@ const CreateItem = () => {
     itemName: '',
     amount: '',
     description: '',
-    image: null, // To hold the file
+    imageUrl: '', // Updated to store the image URL directly
   });
 
   const [previewImage, setPreviewImage] = useState(null); // For image preview
@@ -25,8 +25,9 @@ const CreateItem = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData((prev) => ({ ...prev, image: file }));
-      setPreviewImage(URL.createObjectURL(file)); // Show a preview
+      const imageUrl = URL.createObjectURL(file); // Temporarily use local URL
+      setFormData((prev) => ({ ...prev, imageUrl }));
+      setPreviewImage(imageUrl); // Show a preview
     }
   };
 
@@ -45,25 +46,24 @@ const CreateItem = () => {
         title: formData.itemName,
         description: formData.description,
         price: parseFloat(formData.amount),
-        imageUrl: previewImage, // Could Switch to aws if errors happen on diffrent machines
+        imageUrl: formData.imageUrl,
         createdAt: serverTimestamp(),
       };
 
-      // Send the item to the FireStore DB
-      //DONT CHANGE
-      await addDoc(collection(db, 'items'), newItem);
+      // Add the item to Firestore and get its ID
+      const docRef = await addDoc(collection(db, 'items'), newItem);
 
       setMessage('Item created successfully!');
       setFormData({
         itemName: '',
         amount: '',
         description: '',
-        image: null,
+        imageUrl: '',
       });
       setPreviewImage(null);
 
-      // Navigate to the Items page
-      navigate('/items');
+      // Navigate to the new item's detail page
+      navigate(`/items/${docRef.id}`);
     } catch (error) {
       console.error('Error creating item:', error);
       setMessage('Failed to create item. Please try again.');
@@ -71,7 +71,7 @@ const CreateItem = () => {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto' }}>
+    <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <h2>Create New Item</h2>
       <form onSubmit={handleSubmit}>
         {/* Item Name */}
@@ -119,7 +119,7 @@ const CreateItem = () => {
 
         {/* Image Preview */}
         {previewImage && (
-          <div>
+          <div style={{ margin: '20px 0' }}>
             <p>Image Preview:</p>
             <img src={previewImage} alt="Preview" style={{ maxWidth: '100%' }} />
           </div>

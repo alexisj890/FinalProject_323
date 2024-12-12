@@ -19,7 +19,8 @@ import Sidebar from './components/Sidebar';
 import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
 import CreateItem from './components/CreateItem';
-import LiveBidding from './components/LiveBidding'; // Import Live Bidding
+import LiveBidding from './components/LiveBidding';
+import ItemDetails from './components/ItemDetails'; // Import the ItemDetails component
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -85,6 +86,10 @@ function App() {
           <Route
             path="/items"
             element={<ItemListings newItems={newItems} />} // Pass new items to ItemListings
+          />
+          <Route
+            path="/items/:id"
+            element={<ItemDetails currentUser={currentUser} />} // Pass currentUser to ItemDetails
           />
           <Route
             path="/create-item"
