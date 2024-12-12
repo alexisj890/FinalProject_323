@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import Comments from './Comments'; // Component to handle comments
 import './ItemDetails.css';
@@ -70,6 +70,11 @@ function ItemDetails({ currentUser }) {
 
   // Handle "Buy Now" functionality
   const handleBuyNow = async () => {
+    if (item.ownerId === currentUser?.uid) {
+      alert('You cannot buy your own item.');
+      return;
+    }
+
     try {
       const itemRef = doc(db, 'items', id);
       await updateDoc(itemRef, {
@@ -85,9 +90,29 @@ function ItemDetails({ currentUser }) {
     }
   };
 
+  // Handle delete item functionality
+  const handleDeleteItem = async () => {
+    if (item.ownerId !== currentUser?.uid) {
+      alert('You are not authorized to delete this item.');
+      return;
+    }
+
+    try {
+      const itemRef = doc(db, 'items', id);
+      await deleteDoc(itemRef);
+      alert('Item deleted successfully.');
+      window.location.href = '/items'; // Redirect to items list
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item. Please try again.');
+    }
+  };
+
   if (!item) {
     return <p>Loading item details...</p>;
   }
+
+  const isOwner = currentUser?.uid === item.ownerId;
 
   return (
     <div className="item-details-container">
@@ -100,7 +125,7 @@ function ItemDetails({ currentUser }) {
           <h1>{item.title}</h1>
           <p>{item.description}</p>
           <h2>Price: ${item.curPrice || item.startPrice}</h2>
-          <p>Seller: {item.owner || 'Unknown'}</p>
+          <p>Seller: {item.ownerUsername || 'Unknown'}</p>
           <p>
             {item.curWinner ? (
               <strong>Current Highest Bidder: {item.curWinner}</strong>
@@ -110,24 +135,38 @@ function ItemDetails({ currentUser }) {
           </p>
 
           {/* Bid and Buy Actions */}
-          <div className="actions">
-            <form onSubmit={handlePlaceBid} className="bid-form">
-              <input
-                type="number"
-                placeholder="Enter your bid"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-                className="bid-input"
-                required
-              />
-              <button type="submit" className="bid-button">
-                Place Bid
+          {!isOwner && !item.sold && (
+            <div className="actions">
+              <form onSubmit={handlePlaceBid} className="bid-form">
+                <input
+                  type="number"
+                  placeholder="Enter your bid"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  className="bid-input"
+                  required
+                />
+                <button type="submit" className="bid-button">
+                  Place Bid
+                </button>
+              </form>
+              <button onClick={handleBuyNow} className="buy-now-button">
+                Buy Now
               </button>
-            </form>
-            <button onClick={handleBuyNow} className="buy-now-button">
-              Buy Now
-            </button>
-          </div>
+            </div>
+          )}
+
+          {isOwner && !item.sold && (
+            <div>
+              <p className="info-message">You are the owner of this item.</p>
+              <button onClick={handleDeleteItem} className="delete-button">
+                Delete Item
+              </button>
+            </div>
+          )}
+
+          {item.sold && <p className="info-message">This item has been sold.</p>}
+
           {error && <p className="error-message">{error}</p>}
           {bidSuccess && <p className="success-message">Your bid was placed successfully!</p>}
           {buySuccess && <p className="success-message">Item purchased successfully!</p>}
