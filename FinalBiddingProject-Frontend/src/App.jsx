@@ -21,7 +21,9 @@ import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
 import CreateItem from './components/CreateItem';
 import LiveBidding from './components/LiveBidding';
-import ItemDetails from './components/ItemDetails'; 
+import ItemDetails from './components/ItemDetails';
+import RateUser from './components/RateUser';
+import ComplaintForm from './components/ComplaintForm';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -59,7 +61,7 @@ function App() {
         setCurrentUser(null);
       }
     });
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   // Modal Handlers
@@ -95,17 +97,14 @@ function App() {
               </>
             }
           />
-          <Route
-            path="/items"
-            element={<ItemListings newItems={newItems} />} 
-          />
+          <Route path="/items" element={<ItemListings newItems={newItems} />} />
           <Route
             path="/items/:id"
-            element={<ItemDetails currentUser={currentUser} />} 
+            element={<ItemDetails currentUser={currentUser} />}
           />
           <Route
             path="/create-item"
-            element={<CreateItem addItem={addItem} currentUser={currentUser} />} 
+            element={<CreateItem addItem={addItem} currentUser={currentUser} />}
           />
           <Route
             path="/profile"
@@ -135,9 +134,28 @@ function App() {
           <Route
             path="/LiveBidding"
             element={
-              currentUser ? <LiveBidding currentUser={currentUser} /> : <Navigate to="/" replace />
+              currentUser ? (
+                <LiveBidding currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
             }
           />
+
+          
+          <Route
+            path="/items/:id/rate-owner"
+            element={currentUser ? <RateUser currentUser={currentUser}/> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/items/:id/rate-buyer"
+            element={currentUser ? <RateUser currentUser={currentUser}/> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/items/:id/complain"
+            element={currentUser ? <ComplaintForm currentUser={currentUser}/> : <Navigate to="/" replace />}
+          />
+
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
