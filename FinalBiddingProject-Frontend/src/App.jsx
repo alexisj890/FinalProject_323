@@ -24,6 +24,7 @@ import LiveBidding from './components/LiveBidding';
 import ItemDetails from './components/ItemDetails';
 import RateUser from './components/RateUser';
 import ComplaintForm from './components/ComplaintForm';
+import CreateLiveBids from './components/CreateLiveBids';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -41,12 +42,16 @@ function App() {
 
   // Fetch user data from Firestore
   const fetchUserData = async (user) => {
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-      setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
-    } else {
-      console.error('No user data found in Firestore.');
-      setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
+      } else {
+        console.error('No user data found in Firestore.');
+        setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -87,6 +92,7 @@ function App() {
           currentUser={currentUser}
         />
         <Routes>
+          {/* Home Page */}
           <Route
             path="/"
             element={
@@ -97,20 +103,26 @@ function App() {
               </>
             }
           />
+          {/* Item Listings */}
           <Route path="/items" element={<ItemListings newItems={newItems} />} />
+          {/* Item Details */}
           <Route
             path="/items/:id"
             element={<ItemDetails currentUser={currentUser} />}
           />
+          {/* Create Item */}
           <Route
             path="/create-item"
             element={<CreateItem addItem={addItem} currentUser={currentUser} />}
           />
+          {/* Profile */}
           <Route
             path="/profile"
             element={currentUser ? <Profile /> : <Navigate to="/" replace />}
           />
+          {/* More Info */}
           <Route path="/more-info" element={<MoreInfo />} />
+          {/* Verification Question */}
           <Route
             path="/verification-question"
             element={
@@ -121,41 +133,57 @@ function App() {
               )
             }
           />
+          {/* Comments */}
           <Route path="/items/:id/comments" element={<Comments />} />
+          {/* Ratings */}
           <Route path="/Ratings" element={<TransactionRating />} />
+          {/* Deposit */}
           <Route
             path="/deposit"
             element={currentUser ? <Deposit /> : <Navigate to="/" replace />}
           />
+          {/* Withdraw */}
           <Route
             path="/withdraw"
             element={currentUser ? <Withdraw /> : <Navigate to="/" replace />}
           />
+          {/* Live Bidding */}
           <Route
             path="/LiveBidding"
             element={
-              currentUser ? (
+              currentUser?.role?.toLowerCase() === 'vip' ? (
                 <LiveBidding currentUser={currentUser} />
               ) : (
                 <Navigate to="/" replace />
               )
             }
           />
-
-          
+          {/* Create Live Bids */}
+          <Route
+            path="/CreateLiveBids"
+            element={
+              currentUser?.role?.toLowerCase() === 'vip' ? (
+                <CreateLiveBids currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          {/* Rate User */}
           <Route
             path="/items/:id/rate-owner"
-            element={currentUser ? <RateUser currentUser={currentUser}/> : <Navigate to="/" replace />}
+            element={currentUser ? <RateUser currentUser={currentUser} /> : <Navigate to="/" replace />}
           />
           <Route
             path="/items/:id/rate-buyer"
-            element={currentUser ? <RateUser currentUser={currentUser}/> : <Navigate to="/" replace />}
+            element={currentUser ? <RateUser currentUser={currentUser} /> : <Navigate to="/" replace />}
           />
+          {/* Complaint Form */}
           <Route
             path="/items/:id/complain"
-            element={currentUser ? <ComplaintForm currentUser={currentUser}/> : <Navigate to="/" replace />}
+            element={currentUser ? <ComplaintForm currentUser={currentUser} /> : <Navigate to="/" replace />}
           />
-
+          {/* 404 Page */}
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
