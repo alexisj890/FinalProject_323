@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import Comments from './Comments'; // Component to handle comments
+import Comments from './Comments';
 import './ItemDetails.css';
 
 function ItemDetails({ currentUser }) {
@@ -22,7 +22,19 @@ function ItemDetails({ currentUser }) {
         const itemSnap = await getDoc(itemRef);
 
         if (itemSnap.exists()) {
-          setItem({ id: itemSnap.id, ...itemSnap.data() });
+          const itemData = { id: itemSnap.id, ...itemSnap.data() };
+
+          const sellerRef = doc(db, 'users', itemData.ownerId);
+          const sellerSnap = await getDoc(sellerRef);
+
+          if (sellerSnap.exists()) {
+            itemData.ownerUsername = sellerSnap.data().username || 'Unknown';
+          } else {
+            console.error('Seller not found!');
+            itemData.ownerUsername = 'Unknown';
+          }
+
+          setItem(itemData);
         } else {
           console.error('No such item found!');
           setError('Item not found.');
@@ -37,11 +49,28 @@ function ItemDetails({ currentUser }) {
   }, [id]);
 
   const refetchItem = async () => {
-    const itemRef = doc(db, 'items', id);
-    const itemSnap = await getDoc(itemRef);
-    if (itemSnap.exists()) {
-      setItem({ id: itemSnap.id, ...itemSnap.data() });
-      console.log('Item data re-fetched successfully:', itemSnap.data());
+    try {
+      const itemRef = doc(db, 'items', id);
+      const itemSnap = await getDoc(itemRef);
+      if (itemSnap.exists()) {
+        const itemData = { id: itemSnap.id, ...itemSnap.data() };
+
+        const sellerRef = doc(db, 'users', itemData.ownerId);
+        const sellerSnap = await getDoc(sellerRef);
+
+        if (sellerSnap.exists()) {
+          itemData.ownerUsername = sellerSnap.data().username || 'Unknown';
+        } else {
+          console.error('Seller not found!');
+          itemData.ownerUsername = 'Unknown';
+        }
+
+        setItem(itemData);
+        console.log('Item data re-fetched successfully:', itemData);
+      }
+    } catch (error) {
+      console.error('Error refetching item:', error);
+      setError('Failed to refresh item details.');
     }
   };
 
@@ -111,7 +140,6 @@ function ItemDetails({ currentUser }) {
       const buyerData = buyerSnap.data();
       const sellerData = sellerSnap.data();
 
-      // **Updated Line: Use seller-set price instead of current bid**
       const price = item.price || item.startPrice || 0;
 
       const buyerBalance = buyerData.balance || 0;
@@ -219,7 +247,7 @@ function ItemDetails({ currentUser }) {
       await deleteDoc(itemRef);
       alert('Item deleted successfully.');
       console.log('Item deleted successfully.');
-      navigate('/items'); // Use navigate instead of window.location.href
+      navigate('/items');
     } catch (error) {
       console.error('Error deleting item:', error);
       alert('Failed to delete item. Please try again.');
@@ -263,23 +291,31 @@ function ItemDetails({ currentUser }) {
                     className="bid-input"
                     required
                   />
-                  <button type="submit" className="bid-button">Place Bid</button>
+                  <button type="submit" className="bid-button">
+                    Place Bid
+                  </button>
                 </form>
               ) : (
                 <p>You must be logged in to place a bid.</p>
               )}
-              <button onClick={handleBuyNow} className="buy-now-button">Buy Now for ${item.price || item.startPrice}</button>
+              <button onClick={handleBuyNow} className="buy-now-button">
+                Buy Now for ${item.price || item.startPrice}
+              </button>
             </div>
           )}
 
           {isOwner && !item.sold && (
             <div>
               {item.curPrice && item.curWinner ? (
-                <button onClick={handleAcceptBid} className="accept-bid-button">Accept Bid</button>
+                <button onClick={handleAcceptBid} className="accept-bid-button">
+                  Accept Bid
+                </button>
               ) : (
                 <p>No valid bid to accept yet.</p>
               )}
-              <button onClick={handleDeleteItem} className="delete-button">Delete Item</button>
+              <button onClick={handleDeleteItem} className="delete-button">
+                Delete Item
+              </button>
             </div>
           )}
 
@@ -303,9 +339,7 @@ function ItemDetails({ currentUser }) {
                   )}
 
                   {(currentUser.uid === item.buyerId || currentUser.uid === item.ownerId) && (
-                    <button onClick={() => navigate(`/items/${id}/complain`)}>
-                      File a Complaint
-                    </button>
+                    <button onClick={() => navigate(`/items/${id}/complain`)}>File a Complaint</button>
                   )}
                 </>
               )}
