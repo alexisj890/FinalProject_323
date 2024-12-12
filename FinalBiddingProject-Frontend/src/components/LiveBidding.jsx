@@ -50,7 +50,7 @@ const LiveBidding = ({ currentUser }) => {
       <h2>Live Bidding Session</h2>
       <p>Only VIPs can participate in bidding on items listed by other VIPs.</p>
       <button
-        onClick={() => navigate('/CreateLiveBid')}
+        onClick={() => navigate('/CreateLiveBids')}
         style={{
           marginBottom: '1rem',
           padding: '0.5rem 1rem',

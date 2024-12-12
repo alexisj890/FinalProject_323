@@ -21,7 +21,8 @@ import Deposit from './components/Deposit';
 import Withdraw from './components/Withdraw';
 import CreateItem from './components/CreateItem';
 import LiveBidding from './components/LiveBidding';
-import ItemDetails from './components/ItemDetails'; 
+import CreateLiveBids from './components/CreateLiveBids'; // Import CreateLiveBids component
+import ItemDetails from './components/ItemDetails'; // Import the ItemDetails component
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -39,12 +40,16 @@ function App() {
 
   // Fetch user data from Firestore
   const fetchUserData = async (user) => {
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-      setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
-    } else {
-      console.error('No user data found in Firestore.');
-      setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
+      } else {
+        console.error('No user data found in Firestore.');
+        setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -85,6 +90,7 @@ function App() {
           currentUser={currentUser}
         />
         <Routes>
+          {/* Home Page */}
           <Route
             path="/"
             element={
@@ -95,23 +101,29 @@ function App() {
               </>
             }
           />
+          {/* Item Listings */}
           <Route
             path="/items"
-            element={<ItemListings newItems={newItems} />} 
+            element={<ItemListings newItems={newItems} />}
           />
+          {/* Item Details */}
           <Route
             path="/items/:id"
-            element={<ItemDetails currentUser={currentUser} />} 
+            element={<ItemDetails currentUser={currentUser} />}
           />
+          {/* Create Item */}
           <Route
             path="/create-item"
-            element={<CreateItem addItem={addItem} currentUser={currentUser} />} 
+            element={<CreateItem addItem={addItem} />}
           />
+          {/* Profile */}
           <Route
             path="/profile"
             element={currentUser ? <Profile /> : <Navigate to="/" replace />}
           />
+          {/* More Info */}
           <Route path="/more-info" element={<MoreInfo />} />
+          {/* Verification Question */}
           <Route
             path="/verification-question"
             element={
@@ -122,22 +134,43 @@ function App() {
               )
             }
           />
+          {/* Comments */}
           <Route path="/items/:id/comments" element={<Comments />} />
+          {/* Ratings */}
           <Route path="/Ratings" element={<TransactionRating />} />
+          {/* Deposit */}
           <Route
             path="/deposit"
             element={currentUser ? <Deposit /> : <Navigate to="/" replace />}
           />
+          {/* Withdraw */}
           <Route
             path="/withdraw"
             element={currentUser ? <Withdraw /> : <Navigate to="/" replace />}
           />
+          {/* Live Bidding */}
           <Route
             path="/LiveBidding"
             element={
-              currentUser ? <LiveBidding currentUser={currentUser} /> : <Navigate to="/" replace />
+              currentUser?.role?.toLowerCase() === 'vip' ? (
+                <LiveBidding currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
             }
           />
+          {/* Create Live Bids */}
+          <Route
+            path="/CreateLiveBids"
+            element={
+              currentUser?.role?.toLowerCase() === 'vip' ? (
+                <CreateLiveBids currentUser={currentUser} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          {/* 404 Page */}
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
@@ -159,3 +192,4 @@ function App() {
 }
 
 export default App;
+
