@@ -48,6 +48,11 @@ function ItemListings() {
 
   return (
     <div className="item-listings">
+      <div className="button-container top">
+        <Link to="/create-item" className="view-create-item">
+          Create Item
+        </Link>
+      </div>
       <h2>Available Items</h2>
       <div className="item-listings-grid">
         {items.length > 0 ? (
@@ -55,11 +60,6 @@ function ItemListings() {
         ) : (
           <p>No items available at the moment.</p>
         )}
-      </div>
-      <div className="button-container">
-        <Link to="/create-item" className="view-create-item">
-          Create Item
-        </Link>
       </div>
     </div>
   );
