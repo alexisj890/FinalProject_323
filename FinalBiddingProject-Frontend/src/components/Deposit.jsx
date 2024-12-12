@@ -8,6 +8,7 @@ function Deposit() {
 
   const handleDeposit = async (e) => {
     e.preventDefault();
+
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
       setMessage('Please enter a valid amount greater than 0.');
       return;
@@ -19,7 +20,14 @@ function Deposit() {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const currentBalance = userData.balance || 0; // Default to 0 if no balance exists
+
+        // Only allow deposit if role is 'vip' or 'user'
+        if (userData.role !== 'vip' && userData.role !== 'user') {
+          setMessage('You are not allowed to deposit. Please upgrade your account.');
+          return;
+        }
+
+        const currentBalance = userData.balance || 0; // Default to 0 if no balance is set
         const newBalance = currentBalance + parseFloat(amount);
 
         const updates = { balance: newBalance };

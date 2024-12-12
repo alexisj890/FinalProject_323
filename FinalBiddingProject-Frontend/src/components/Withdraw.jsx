@@ -8,6 +8,7 @@ function Withdraw() {
 
   const handleWithdraw = async (e) => {
     e.preventDefault();
+
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
       setMessage('Please enter a valid amount greater than 0.');
       return;
@@ -19,6 +20,13 @@ function Withdraw() {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
+
+        // Only allow withdrawal if role is 'vip' or 'user'
+        if (userData.role !== 'vip' && userData.role !== 'user') {
+          setMessage('You are not allowed to withdraw. Please upgrade your account.');
+          return;
+        }
+
         const currentBalance = userData.balance || 0;
         const withdrawalAmount = parseFloat(amount);
 
@@ -33,15 +41,11 @@ function Withdraw() {
         if (newBalance < 5000 && userData.role === 'vip') {
           updates.role = 'user';
           setMessage(
-            `Withdrawal successful! Your new balance is $${newBalance.toFixed(
-              2
-            )}. You are no longer a VIP`
+            `Withdrawal successful! Your new balance is $${newBalance.toFixed(2)}. You are no longer a VIP.`
           );
         } else {
           setMessage(
-            `Successfully withdrew $${amount}. New balance: $${newBalance.toFixed(
-              2
-            )}`
+            `Successfully withdrew $${amount}. New balance: $${newBalance.toFixed(2)}`
           );
         }
 
