@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
@@ -36,14 +37,25 @@ function App() {
     setNewItems((prevItems) => [...prevItems, newItem]);
   };
 
+  // Fetch user data from Firestore
+  const fetchUserData = async (user) => {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists()) {
+      setCurrentUser({ uid: user.uid, email: user.email, ...userDoc.data() });
+    } else {
+      console.error('No user data found in Firestore.');
+      setCurrentUser({ uid: user.uid, email: user.email, role: 'visitor' }); // Default to visitor role
+    }
+  };
+
   // Firebase Auth Listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log('User is logged in:', user); // Debug log
-        setCurrentUser(user);
+        console.log('User is logged in:', user);
+        await fetchUserData(user);
       } else {
-        console.log('No user logged in'); // Debug log
+        console.log('No user logged in.');
         setCurrentUser(null);
       }
     });
@@ -95,7 +107,10 @@ function App() {
             path="/create-item"
             element={<CreateItem addItem={addItem} />} // Updated route with addItem prop
           />
-          <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/profile"
+            element={currentUser ? <Profile /> : <Navigate to="/" replace />}
+          />
           <Route path="/more-info" element={<MoreInfo />} />
           <Route
             path="/verification-question"
@@ -109,9 +124,20 @@ function App() {
           />
           <Route path="/items/:id/comments" element={<Comments />} />
           <Route path="/Ratings" element={<TransactionRating />} />
-          <Route path="/deposit" element={<Deposit />} />
-          <Route path="/withdraw" element={<Withdraw />} />
-          <Route path="/live-bidding" element={<LiveBidding currentUser={currentUser} />} />
+          <Route
+            path="/deposit"
+            element={currentUser ? <Deposit /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/withdraw"
+            element={currentUser ? <Withdraw /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/LiveBidding"
+            element={
+              currentUser ? <LiveBidding currentUser={currentUser} /> : <Navigate to="/" replace />
+            }
+          />
           <Route
             path="*"
             element={<h1 style={{ textAlign: 'center' }}>404 - Page Not Found</h1>}
