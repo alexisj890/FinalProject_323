@@ -148,6 +148,10 @@ function Profile() {
       <p><strong>Current Role:</strong> {roleDisplay}</p>
       <p><strong>Current Balance:</strong> ${userData.balance?.toFixed(2) || '0.00'}</p>
 
+      {/* Display transactions and complaints */}
+      <p><strong>Transactions:</strong> {userData.transactionCount || 0}</p>
+      <p><strong>Complaints:</strong> {userData.complaintCount || 0}</p>
+
       {/* If the user is the super user */}
       {userData.username === '322Bidding' && (
         <p style={{ color: 'green', fontWeight: 'bold', margin: '1rem 0' }}>
