@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -31,9 +31,11 @@ function Profile() {
           }
         } else {
           console.error('User data not found in Firestore');
+          setUserData(null);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        setUserData(null);
       }
     };
 
@@ -43,15 +45,6 @@ function Profile() {
   if (!userData) {
     return <p>Loading...</p>;
   }
-
-  // Function to retrieve rating for a specific transaction
-  const getRatingForTransaction = (transactionId) => {
-    if (!userData.ratings) return null;
-    const ratingObj = userData.ratings.find(
-      (rating) => rating.transactionId === transactionId
-    );
-    return ratingObj ? ratingObj.value : null;
-  };
 
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
@@ -79,48 +72,6 @@ function Profile() {
           <p>No ratings yet.</p>
         </div>
       )}
-
-      <div style={{ marginTop: '1.5rem' }}>
-        <h2>Previous Transactions</h2>
-        {userData.transactions && userData.transactions.length > 0 ? (
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {userData.transactions.map((transaction, index) => {
-              const rating = getRatingForTransaction(transaction.id || transaction.transactionId);
-              return (
-                <li
-                  key={index}
-                  style={{
-                    margin: '0.5rem 0',
-                    borderBottom: '1px solid #ccc',
-                    paddingBottom: '0.5rem',
-                  }}
-                >
-                  <strong>{transaction.type}:</strong> ${transaction.amount.toFixed(2)} on{' '}
-                  {new Date(transaction.date).toLocaleDateString()}
-                  {rating !== null && (
-                    <p style={{ margin: 0 }}>
-                      <strong>Rating:</strong> {rating} / 5
-                    </p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>No transactions yet.</p>
-        )}
-      </div>
-
-      <div style={{ marginTop: '1.5rem' }}>
-        <h2>Cart</h2>
-        <p>View your current cart and items you are bidding on.</p>
-        <Link
-          to="/cart"
-          style={{ textDecoration: 'none', color: '#007bff', fontWeight: 'bold' }}
-        >
-          Go to Cart
-        </Link>
-      </div>
     </div>
   );
 }
