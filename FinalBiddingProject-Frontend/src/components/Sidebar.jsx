@@ -25,7 +25,7 @@ function Sidebar({ isOpen, toggleSidebar, currentUser }) {
               <Link to="/deposit" onClick={toggleSidebar}>Deposit</Link>
             </li>
             <li>
-            <Link to="/live-bidding" onClick={toggleSidebar}>Live Bidding</Link>
+            <Link to="/LiveBidding" onClick={toggleSidebar}>Live Bidding</Link>
 
             </li>
           </>

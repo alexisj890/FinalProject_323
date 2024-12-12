@@ -10,8 +10,13 @@ const LiveBidding = ({ currentUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Restricting access for non-VIPs 
-    if (!currentUser || currentUser.role !== 'VIP') {
+    if (!currentUser) {
+      alert('Please log in to access Live Bidding.');
+      navigate('/');
+      return;
+    }
+
+    if (!currentUser.role || currentUser.role.toLowerCase() !== 'vip') {
       alert('Access restricted to VIP members.');
       navigate('/');
       return;
@@ -44,6 +49,20 @@ const LiveBidding = ({ currentUser }) => {
     <div className="live-bidding" style={{ padding: '1rem' }}>
       <h2>Live Bidding Session</h2>
       <p>Only VIPs can participate in bidding on items listed by other VIPs.</p>
+      <button
+        onClick={() => navigate('/CreateLiveBid')}
+        style={{
+          marginBottom: '1rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: '#007bff',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Create Live Bid
+      </button>
       {vipItems.length > 0 ? (
         <BiddingRoom items={vipItems} currentUser={currentUser} />
       ) : (
