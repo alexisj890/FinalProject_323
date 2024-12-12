@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { doc, getDoc, collection, onSnapshot } from 'firebase/firestore';
+import './ItemCard.css'; // Reuse the same CSS for styling cards
 
 function Profile() {
   const [userData, setUserData] = useState(null);
   const [averageRating, setAverageRating] = useState(null);
   const [ongoingBids, setOngoingBids] = useState([]);
+  const [liveBidsWon, setLiveBidsWon] = useState([]);
   const [itemsBought, setItemsBought] = useState([]);
   const navigate = useNavigate();
 
@@ -24,11 +26,12 @@ function Profile() {
           const data = userDoc.data();
           setUserData(data);
 
+          // Calculate average rating based on ratings array
           if (data.ratings && data.ratings.length > 0) {
             const totalRating = data.ratings.reduce((acc, r) => acc + r.value, 0);
             setAverageRating((totalRating / data.ratings.length).toFixed(2));
           } else {
-            setAverageRating(null);
+            setAverageRating(null); // No ratings yet
           }
         } else {
           console.error('User data not found in Firestore');
@@ -43,7 +46,6 @@ function Profile() {
     fetchUserData();
   }, [navigate]);
 
-  // Fetch transaction history (ongoing bids and items bought)
   useEffect(() => {
     if (!auth.currentUser) return; // Wait until the user is signed in
 
@@ -65,12 +67,24 @@ function Profile() {
             new Date(item.endTime) > now
         );
 
-        // Items bought: user is the winner and the item is sold
+        // Live Bids Won: user is winner, item is live bid, and sold == true
+        const userLiveBidsWon = allItems.filter(
+          (item) =>
+            item.isLiveBid === true &&
+            item.sold === true &&
+            item.curWinner === userEmail
+        );
+
+        // Items Bought (Regular): user is winner, item is not a live bid, and sold == true
         const userItemsBought = allItems.filter(
-          (item) => item.sold === true && item.curWinner === userEmail
+          (item) =>
+            (item.isLiveBid !== true) &&
+            item.sold === true &&
+            item.curWinner === userEmail
         );
 
         setOngoingBids(userOngoingBids);
+        setLiveBidsWon(userLiveBidsWon);
         setItemsBought(userItemsBought);
       },
       (error) => {
@@ -92,6 +106,33 @@ function Profile() {
       ? 'Verified User'
       : 'Visitor';
 
+  const renderItemsAsCards = (itemsArray) => {
+    if (itemsArray.length === 0) return <p>No items available.</p>;
+
+    return (
+      <div className="item-listings-grid">
+        {itemsArray.map((item) => {
+          const itemPrice = item.curPrice || item.price || 0;
+          return (
+            <div className="item-card" key={item.id}>
+              <img src={item.imageUrl} alt={item.title} />
+              <h3>{item.title}</h3>
+              <p className="price">${itemPrice}</p>
+              <div className="button-container">
+                <Link to={`/items/${item.id}`} className="view-details-button">
+                  View Details
+                </Link>
+                <Link to={`/items/${item.id}/comments`} className="view-comments-link">
+                  View Comments
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', textAlign: 'center' }}>
       <h1>Profile</h1>
@@ -99,13 +140,11 @@ function Profile() {
       <p><strong>Email:</strong> {auth.currentUser.email}</p>
       <p><strong>Current Role:</strong> {roleDisplay}</p>
       <p><strong>Current Balance:</strong> ${userData.balance?.toFixed(2) || '0.00'}</p>
-      <p><strong>Transactions Completed:</strong> {userData.transactionCount || 0}</p>
-      <p><strong>Complaints:</strong> {userData.complaintCount || 0}</p>
 
       {averageRating !== null ? (
         <div style={{ marginTop: '1.5rem' }}>
           <h2>Average Rating</h2>
-          <p>{averageRating} / 5</p>
+          <p>{averageRating} / 5.00</p>
         </div>
       ) : (
         <div style={{ marginTop: '1.5rem' }}>
@@ -116,30 +155,13 @@ function Profile() {
 
       <div style={{ marginTop: '2rem', textAlign: 'left' }}>
         <h2>Ongoing Bids</h2>
-        {ongoingBids.length > 0 ? (
-          <ul>
-            {ongoingBids.map((item) => (
-              <li key={item.id}>
-                <strong>{item.title}</strong> - Current Price: ${item.curPrice}, Ends: {new Date(item.endTime).toLocaleString()}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No ongoing bids at the moment.</p>
-        )}
+        {renderItemsAsCards(ongoingBids)}
+
+        <h2 style={{ marginTop: '2rem' }}>Live Bids Won</h2>
+        {renderItemsAsCards(liveBidsWon)}
 
         <h2 style={{ marginTop: '2rem' }}>Items Bought</h2>
-        {itemsBought.length > 0 ? (
-          <ul>
-            {itemsBought.map((item) => (
-              <li key={item.id}>
-                <strong>{item.title}</strong> - Final Price: ${item.curPrice}, Purchased On: {item.endTime ? new Date(item.endTime).toLocaleString() : 'N/A'}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>You haven't bought any items yet.</p>
-        )}
+        {renderItemsAsCards(itemsBought)}
       </div>
     </div>
   );
