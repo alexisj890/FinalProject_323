@@ -24,6 +24,14 @@ function ItemDetails({ currentUser }) {
         if (itemSnap.exists()) {
           const itemData = { id: itemSnap.id, ...itemSnap.data() };
 
+          // Verify that ownerId exists
+          if (!itemData.ownerId) {
+            console.error('ownerId is missing in the item document.');
+            setError('Item owner information is missing.');
+            return;
+          }
+
+          // Fetch Seller's Username
           const sellerRef = doc(db, 'users', itemData.ownerId);
           const sellerSnap = await getDoc(sellerRef);
 
@@ -39,8 +47,8 @@ function ItemDetails({ currentUser }) {
           console.error('No such item found!');
           setError('Item not found.');
         }
-      } catch (error) {
-        console.error('Error fetching item:', error);
+      } catch (err) {
+        console.error('Error fetching item:', err);
         setError('Failed to load item details.');
       }
     };
@@ -55,6 +63,14 @@ function ItemDetails({ currentUser }) {
       if (itemSnap.exists()) {
         const itemData = { id: itemSnap.id, ...itemSnap.data() };
 
+        // Verify that ownerId exists
+        if (!itemData.ownerId) {
+          console.error('ownerId is missing in the item document.');
+          setError('Item owner information is missing.');
+          return;
+        }
+
+        // Fetch Seller's Username Again
         const sellerRef = doc(db, 'users', itemData.ownerId);
         const sellerSnap = await getDoc(sellerRef);
 
@@ -68,8 +84,8 @@ function ItemDetails({ currentUser }) {
         setItem(itemData);
         console.log('Item data re-fetched successfully:', itemData);
       }
-    } catch (error) {
-      console.error('Error refetching item:', error);
+    } catch (err) {
+      console.error('Error refetching item:', err);
       setError('Failed to refresh item details.');
     }
   };
@@ -107,8 +123,8 @@ function ItemDetails({ currentUser }) {
       setBidSuccess(true);
       setTimeout(() => setBidSuccess(false), 3000);
       setError('');
-    } catch (error) {
-      console.error('Error placing bid:', error);
+    } catch (err) {
+      console.error('Error placing bid:', err);
       setError('Failed to place bid. Please try again.');
     }
   };
@@ -153,9 +169,11 @@ function ItemDetails({ currentUser }) {
       const buyerNewBalance = buyerBalance - price;
       const sellerNewBalance = sellerBalance + price;
 
+      // Update buyer and seller balances
       await updateDoc(buyerRef, { balance: buyerNewBalance });
       await updateDoc(sellerRef, { balance: sellerNewBalance });
 
+      // Update item status to sold
       const itemRef = doc(db, 'items', id);
       await updateDoc(itemRef, {
         sold: true,
@@ -172,8 +190,8 @@ function ItemDetails({ currentUser }) {
       console.log('Item purchased successfully.');
 
       await refetchItem();
-    } catch (error) {
-      console.error('Error processing Buy Now:', error);
+    } catch (err) {
+      console.error('Error processing Buy Now:', err);
       alert('Failed to complete purchase. Please try again.');
     }
   };
@@ -213,6 +231,7 @@ function ItemDetails({ currentUser }) {
       const newOwnerBalance = ownerBalance + item.curPrice;
       const newBidderBalance = bidderBalance - item.curPrice;
 
+      // Update owner and bidder balances and mark item as sold
       await Promise.all([
         updateDoc(ownerRef, { balance: newOwnerBalance }),
         updateDoc(bidderRef, { balance: newBidderBalance }),
@@ -230,8 +249,8 @@ function ItemDetails({ currentUser }) {
       console.log('Bid accepted successfully.');
 
       await refetchItem();
-    } catch (error) {
-      console.error('Error accepting bid:', error);
+    } catch (err) {
+      console.error('Error accepting bid:', err);
       setError('Failed to accept bid. Please try again.');
     }
   };
@@ -242,15 +261,28 @@ function ItemDetails({ currentUser }) {
       return;
     }
 
+    // Debugging Logs
+    console.log('Current User ID:', currentUser.uid);
+    console.log('Item Owner ID:', item.ownerId);
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
       const itemRef = doc(db, 'items', id);
       await deleteDoc(itemRef);
       alert('Item deleted successfully.');
       console.log('Item deleted successfully.');
       navigate('/items');
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('Failed to delete item. Please try again.');
+    } catch (err) {
+      console.error('Error deleting item:', err);
+      if (err.code === 'permission-denied') {
+        alert('You do not have permission to delete this item.');
+      } else {
+        alert('Failed to delete item. Please try again.');
+      }
     }
   };
 

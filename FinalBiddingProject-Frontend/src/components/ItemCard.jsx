@@ -32,9 +32,6 @@ function ItemCard({ item }) {
         <Link to={`/items/${id}/comments`} className="view-comments-link">
           View Comments
         </Link>
-        <button onClick={handleDelete} className="delete-button">
-          Delete Item
-        </button>
       </div>
     </div>
   );
