@@ -1,0 +1,35 @@
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .profile-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .profile-container p {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+  }
+  
+  .average-rating,
+  .vip-benefits,
+  .suspension-info {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  .vip-benefits {
+    background-color: #e6ffe6;
+  }
+  
+  .suspension-info {
+    background-color: #ffe6e6;
+    color: #cc0000;
+  }
+  

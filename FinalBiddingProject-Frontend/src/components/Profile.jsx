@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { doc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 
+
 function Profile() {
   const [userData, setUserData] = useState(null);
   const [averageRating, setAverageRating] = useState(null);
