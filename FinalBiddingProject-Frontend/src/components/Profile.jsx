@@ -22,20 +22,12 @@ function Profile() {
           const data = userDoc.data();
           setUserData(data);
 
-          // Calculate average rating based on transactions
-          if (data.transactions && data.transactions.length > 0) {
-            const ratedTransactions = data.transactions.filter(
-              (transaction) => transaction.rating !== undefined
-            );
-            if (ratedTransactions.length > 0) {
-              const totalRating = ratedTransactions.reduce(
-                (acc, transaction) => acc + transaction.rating,
-                0
-              );
-              setAverageRating((totalRating / ratedTransactions.length).toFixed(2));
-            } else {
-              setAverageRating(null); // No ratings in transactions
-            }
+          // Calculate average rating based on ratings array
+          if (data.ratings && data.ratings.length > 0) {
+            const totalRating = data.ratings.reduce((acc, r) => acc + r.value, 0);
+            setAverageRating((totalRating / data.ratings.length).toFixed(2));
+          } else {
+            setAverageRating(null); // No ratings yet
           }
         } else {
           console.error('User data not found in Firestore');
@@ -51,6 +43,15 @@ function Profile() {
   if (!userData) {
     return <p>Loading...</p>;
   }
+
+  // Function to retrieve rating for a specific transaction
+  const getRatingForTransaction = (transactionId) => {
+    if (!userData.ratings) return null;
+    const ratingObj = userData.ratings.find(
+      (rating) => rating.transactionId === transactionId
+    );
+    return ratingObj ? ratingObj.value : null;
+  };
 
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
@@ -83,24 +84,27 @@ function Profile() {
         <h2>Previous Transactions</h2>
         {userData.transactions && userData.transactions.length > 0 ? (
           <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {userData.transactions.map((transaction, index) => (
-              <li
-                key={index}
-                style={{
-                  margin: '0.5rem 0',
-                  borderBottom: '1px solid #ccc',
-                  paddingBottom: '0.5rem',
-                }}
-              >
-                <strong>{transaction.type}:</strong> ${transaction.amount.toFixed(2)} on{' '}
-                {new Date(transaction.date).toLocaleDateString()}
-                {transaction.rating !== undefined && (
-                  <p style={{ margin: 0 }}>
-                    <strong>Rating:</strong> {transaction.rating} / 5
-                  </p>
-                )}
-              </li>
-            ))}
+            {userData.transactions.map((transaction, index) => {
+              const rating = getRatingForTransaction(transaction.id || transaction.transactionId);
+              return (
+                <li
+                  key={index}
+                  style={{
+                    margin: '0.5rem 0',
+                    borderBottom: '1px solid #ccc',
+                    paddingBottom: '0.5rem',
+                  }}
+                >
+                  <strong>{transaction.type}:</strong> ${transaction.amount.toFixed(2)} on{' '}
+                  {new Date(transaction.date).toLocaleDateString()}
+                  {rating !== null && (
+                    <p style={{ margin: 0 }}>
+                      <strong>Rating:</strong> {rating} / 5
+                    </p>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p>No transactions yet.</p>
